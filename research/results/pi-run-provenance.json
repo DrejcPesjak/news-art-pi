@@ -1,0 +1,16 @@
+{
+  "experiment_commit": "d4e692b2fa9dd2204c57fab15e7e01a9d2331d41",
+  "image_generator": "SupraLabs/Supra2-IMG",
+  "active_decoder": "madebyollin/taesd",
+  "guidance": 3.0,
+  "initial_noise": "Saved CUDA seed-0 latent; same initial noise used across runtimes",
+  "cpu_threads": 4,
+  "nice": 10,
+  "data_limit_mib": 480,
+  "generation_compute": "Raspberry Pi CPU only",
+  "post_run_get_throttled": "0x0",
+  "post_run_temperature_c": 47.6,
+  "production_deploy_revision": "6139c7ffd9b929b75713a351e5f8fdf9ccda65d0",
+  "production_backend": "demo",
+  "minimal_runtime_bundle_mib": 412.3816385269165
+}

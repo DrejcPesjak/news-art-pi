@@ -1,0 +1,12 @@
+{
+  "component": "dit",
+  "machine": "armv7l",
+  "threads": 3,
+  "load_seconds": 16.75512606600023,
+  "forward_seconds": 13.964318375999937,
+  "peak_rss_mib": 444.50390625,
+  "relative_rmse": 0.0005322883229148215,
+  "max_abs_error": 0.00156325101852417,
+  "passed": true,
+  "note": "One component forward, not a complete generated image."
+}

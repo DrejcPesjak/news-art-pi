@@ -1,0 +1,10 @@
+{
+  "stage": "decode",
+  "load_seconds": 0.2606925699992644,
+  "compute_seconds": 21.2917952960006,
+  "total_seconds": 21.552487865999865,
+  "peak_rss_mib": 118.00390625,
+  "threads": 4,
+  "machine": "armv7l",
+  "data_limit_mib": 480
+}

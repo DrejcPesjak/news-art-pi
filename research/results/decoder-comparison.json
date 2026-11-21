@@ -1,0 +1,27 @@
+{
+  "steps": 25,
+  "seed": 0,
+  "guidance": 3,
+  "same_latents_for_both_decoders": true,
+  "revisions": {
+    "supra": [
+      "SupraLabs/Supra2-IMG",
+      "b6186a6e8fa9a846c44b804f42639ce4228e3b94"
+    ],
+    "text": [
+      "google/flan-t5-base",
+      "7bcac572ce56db69c1ea7c8af255c5d7c9672fc2"
+    ],
+    "vae": [
+      "stabilityai/sd-vae-ft-mse",
+      "31f26fdeee1355a5c34592e401dd41e45d25a493"
+    ],
+    "tiny": [
+      "madebyollin/taesd",
+      "614f76814bbe30edbe2e627ace1c2234c81a2c0e"
+    ]
+  },
+  "original_decoder_parameters": 49490179,
+  "tiny_decoder_parameters": 1222531,
+  "note": "A lossy pretrained decoder substitution, not training or a second image generator."
+}

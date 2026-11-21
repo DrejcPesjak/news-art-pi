@@ -20,7 +20,7 @@ def main():
     parser.add_argument("--seed",type=int,default=0)
     parser.add_argument("--threads",type=int,default=3)
     parser.add_argument("--initial-latent",type=Path)
-    parser.add_argument("--decoder",choices=["full","tiled","tiny"],default="tiled")
+    parser.add_argument("--decoder",choices=["full","tiled","tiny"],default="tiny")
     parser.add_argument("--memory-mib",type=int,default=0,
                         help="Linux process data/allocation limit; 0 leaves it unchanged")
     parser.add_argument("--packed-decoder",action="store_true")

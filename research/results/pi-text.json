@@ -1,0 +1,12 @@
+{
+  "component": "text",
+  "machine": "armv7l",
+  "threads": 4,
+  "load_seconds": 15.306801269000061,
+  "forward_seconds": 7.426739104999797,
+  "peak_rss_mib": 359.546875,
+  "relative_rmse": 0.0009452447943231972,
+  "max_abs_error": 0.0006511006504297256,
+  "passed": true,
+  "note": "One component forward, not a complete generated image."
+}

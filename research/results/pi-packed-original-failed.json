@@ -1,0 +1,9 @@
+{
+  "experiment": "Original full-frame SD decoder with packing on the Pi",
+  "completed": false,
+  "controller_runtime_seconds": 364.996,
+  "controller_cpu_seconds": 1399.211,
+  "data_limit_mib": 480,
+  "error": "NCNN inference failed: -100",
+  "note": "This failed under the process allocation limit. It is not a completed image latency. The compatible distilled decoder was selected instead."
+}

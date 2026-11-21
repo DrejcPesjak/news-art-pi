@@ -99,9 +99,9 @@ mean the Pi can compute in fp16 or that runtime RAM halves. FP32/FP16 export
 validation outcomes are recorded alongside the artifacts. Do not deploy an
 artifact whose validation says `passed: false`.
 
-Pi feasibility requires all three components, sequential loading to control peak
-RAM, numerical/visual validation, and actual on-device latency measurements. A
-working DiT export alone would not make the Pi self-sufficient for generation.
+The Pi trials load the components sequentially, validate real outputs, and report
+on-device timings. A working DiT export alone does not establish complete image
+generation. The practical path uses the distilled decoder described below.
 
 ## Staged CPU pipeline
 
@@ -112,24 +112,28 @@ memory is released before loading the next. NCNN computes in fp32; compact fp16
 weight files do not imply fp16 arithmetic on ARMv7.
 
 ```bash
-# Export the two remaining components after the verified DiT export above:
+# Export the remaining runtime components after the verified DiT exports above:
 HF_HUB_OFFLINE=1 ~/venvs/ml/bin/python -m research.supra.component_export text
-HF_HUB_OFFLINE=1 ~/venvs/ml/bin/python -m research.supra.component_export vae
-HF_HUB_OFFLINE=1 ~/venvs/ml/bin/python -m research.supra.component_export vae --tile-size 20
+HF_HUB_OFFLINE=1 ~/venvs/ml/bin/python -m research.supra.component_export tiny
 # Validate real conditional contexts (requires both fp32 and compact DiT exports):
 HF_HUB_OFFLINE=1 ~/venvs/ml/bin/python -m research.supra.validate_ncnn
 # Bundle only runtime weights/graphs/tokenizer, with integrity checks:
-~/venvs/ml/bin/python -m research.supra.bundle create artifacts/supra/runtime-bundle
+~/venvs/ml/bin/python -m research.supra.bundle create artifacts/supra/runtime-bundle --decoder tiny
 ~/venvs/ml/bin/python -m research.supra.bundle verify artifacts/supra/runtime-bundle
 ~/venvs/ml/bin/python -m research.supra.staged generate \
   --model-dir artifacts/supra/runtime-bundle --output artifacts/supra/cpu-image \
-  --steps 25 --threads 4 --decoder tiled
+  --steps 25 --threads 4 --decoder tiny --packed-decoder
 ```
 
 `--decoder full` uses the original whole-frame decoder graph. `--decoder tiled`
 uses four overlapping latent tiles with blended borders; it is a memory/quality
 tradeoff, not numerically equivalent to whole-frame decoding. Full and tiled
 graphs have byte-identical weights, so the runtime bundle stores those once.
+To create these reference exports, run `component_export vae` and
+`component_export vae --tile-size 20`. Choose `bundle create ... --decoder full`,
+`--decoder tiled`, or `--decoder all` to package them. The default minimal bundle
+contains only the tiny decoder. Bundle creation requires a fresh output directory
+and checks that the DiT passed all five real-context validations.
 
 `--decoder tiny` substitutes the compatible TAESD distilled decoder for the
 original SD VAE. Supra2's DiT and Flan-T5 text encoder remain unchanged: this is
@@ -142,6 +146,7 @@ VAE, its input must **not** be divided by 0.18215.
 
 ```bash
 HF_HUB_OFFLINE=1 ~/venvs/ml/bin/python -m research.supra.component_export tiny
+HF_HUB_OFFLINE=1 ~/venvs/ml/bin/python -m research.supra.compare_decoders
 ```
 
 `--packed-decoder` enables channel packing for decoding while keeping direct
@@ -172,13 +177,13 @@ For example, from the checkout directory in an SSH session:
 
 ```bash
 systemd-run --user --wait --pipe --collect --unit=news-art-model-trial \
-  -p MemoryMax=520M -p MemorySwapMax=0 -p Nice=10 -p RuntimeMaxSec=1200 \
+  -p Nice=10 -p RuntimeMaxSec=1200 \
   -p WorkingDirectory="$PWD" \
   /usr/bin/env PYTHONPATH="$HOME/.local/share/news-art-pi/ncnn-runtime" \
   /usr/bin/python3 -m research.supra.staged generate \
   --model-dir "$HOME/.local/share/news-art-pi/supra-models" \
   --output "$HOME/.local/share/news-art-pi/supra-results/image" \
-  --steps 10 --threads 4 --decoder tiled --memory-mib 480
+  --steps 25 --threads 4 --decoder tiny --packed-decoder --memory-mib 480
 ```
 
 Reports separate model loading, computation, and per-stage peak RSS. The process
