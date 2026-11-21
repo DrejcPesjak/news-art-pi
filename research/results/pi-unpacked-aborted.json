@@ -1,0 +1,9 @@
+{
+  "experiment": "Pi end-to-end trial with unpacked direct full-frame decoding",
+  "completed": false,
+  "controller_runtime_seconds": 773.729,
+  "controller_cpu_seconds": 2877.809,
+  "stop_reason": "Decoder remained running after completed encode and sampling stages; switched to packed decoding of the retained latent.",
+  "confirmed_decoder_lower_bound_seconds": 480,
+  "note": "This is an aborted trial, not a measured complete image latency. Initial isolated decoder profile also timed out at 300 seconds."
+}

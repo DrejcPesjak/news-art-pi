@@ -39,6 +39,11 @@ def main():
     names=[f"{component}.ncnn.{suffix}" for component in ["dit","text","vae_tile20"] for suffix in ["param","bin"]]
     names.extend(["embedding.npy"])
     names.append("vae.ncnn.param")
+    tiny_validation=args.source/"tiny-validation.json"
+    if tiny_validation.exists():
+        if not json.loads(tiny_validation.read_text())["passed"]:
+            raise ValueError("Refusing to bundle failed tiny decoder export")
+        names.extend(["tiny.ncnn.param","tiny.ncnn.bin"])
     for name in names:
         shutil.copyfile(args.source/name,args.directory/name)
     # Full-frame and tile graphs use byte-identical weights. Store them once.

@@ -9,7 +9,7 @@ import pnnx
 import torch
 from torch import nn
 from transformers import AutoTokenizer, T5EncoderModel
-from diffusers import AutoencoderKL
+from diffusers import AutoencoderKL, AutoencoderTiny
 
 from .assets import MODEL_DIR, ROOT
 from .model import VAE_SCALE
@@ -80,9 +80,19 @@ class DecoderCore(nn.Module):
         return self.vae.decode(z/VAE_SCALE,return_dict=False)[0]
 
 
+class TinyDecoderCore(nn.Module):
+    def __init__(self,vae):
+        super().__init__()
+        self.vae=vae
+
+    def forward(self,z):
+        # TAESD consumes already-scaled SD latents, unlike the original VAE.
+        return self.vae.decode(z,return_dict=False)[0]
+
+
 def main():
     parser=argparse.ArgumentParser()
-    parser.add_argument("component",choices=["text","vae"])
+    parser.add_argument("component",choices=["text","vae","tiny"])
     parser.add_argument("--output",type=Path,default=ROOT/"artifacts/supra/ncnn")
     parser.add_argument("--fp32-storage",action="store_true")
     parser.add_argument("--tile-size",type=int,default=32)
@@ -104,6 +114,14 @@ def main():
         model=EncoderCore(text).eval()
         with torch.inference_mode():rewritten=model(*inputs).numpy()
         np.savez(args.output/"text-fixture.npz",in0=embedded.detach().numpy(),in1=inputs[1].numpy(),expected=expected)
+    elif args.component=="tiny":
+        vae=AutoencoderTiny.from_pretrained(MODEL_DIR/"tiny",local_files_only=True,torch_dtype=torch.float32).eval().requires_grad_(False)
+        vae.encoder=None
+        inputs=(torch.randn(1,4,32,32),)
+        with torch.inference_mode():expected=vae.decode(inputs[0]).sample.numpy()
+        model=TinyDecoderCore(vae).eval()
+        rewritten=expected
+        np.savez(args.output/"tiny-fixture.npz",in0=inputs[0].numpy(),expected=expected)
     else:
         vae=AutoencoderKL.from_pretrained(MODEL_DIR/"vae",local_files_only=True,torch_dtype=torch.float32).eval().requires_grad_(False)
         vae.encoder=None;vae.quant_conv=None

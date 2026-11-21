@@ -1,0 +1,9 @@
+{
+  "component": "tiny",
+  "rewrite_relative_rmse": 0.0,
+  "ncnn_relative_rmse": 0.0008018320181896947,
+  "max_abs_error": 0.007404148578643799,
+  "x86_seconds": 0.3162169770002947,
+  "weights_mib": 2.3357162475585938,
+  "passed": true
+}

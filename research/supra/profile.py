@@ -12,7 +12,7 @@ from .ncnn_runtime import NCNNModel
 
 def main():
     parser=argparse.ArgumentParser()
-    parser.add_argument("component",choices=["dit","text","vae","vae_tile20"])
+    parser.add_argument("component",choices=["dit","text","vae","vae_tile20","tiny"])
     parser.add_argument("--model-dir",type=Path,required=True)
     parser.add_argument("--output",type=Path,required=True)
     parser.add_argument("--threads",type=int,default=3)

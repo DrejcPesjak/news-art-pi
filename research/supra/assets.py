@@ -7,6 +7,7 @@ REVISIONS = {
     "supra": ("SupraLabs/Supra2-IMG", "b6186a6e8fa9a846c44b804f42639ce4228e3b94"),
     "text": ("google/flan-t5-base", "7bcac572ce56db69c1ea7c8af255c5d7c9672fc2"),
     "vae": ("stabilityai/sd-vae-ft-mse", "31f26fdeee1355a5c34592e401dd41e45d25a493"),
+    "tiny": ("madebyollin/taesd", "614f76814bbe30edbe2e627ace1c2234c81a2c0e"),
 }
 
 
@@ -18,6 +19,7 @@ def download():
         "supra": ["model_final_ema.pt", "config.json", "README.md", "inference.py"],
         "text": ["*.json", "spiece.model", "model.safetensors", "README.md"],
         "vae": ["config.json", "diffusion_pytorch_model.safetensors", "README.md"],
+        "tiny": ["config.json", "diffusion_pytorch_model.safetensors", "README.md"],
     }
     for name, (repo, revision) in REVISIONS.items():
         snapshot_download(repo, revision=revision, allow_patterns=patterns[name],

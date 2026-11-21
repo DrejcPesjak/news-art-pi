@@ -33,6 +33,7 @@ generation, `trust_remote_code` or unrestricted pickle loading are used.
 | [SupraLabs/Supra2-IMG](https://huggingface.co/SupraLabs/Supra2-IMG) | `b6186a6e8fa9a846c44b804f42639ce4228e3b94` | Apache-2.0 |
 | [google/flan-t5-base](https://huggingface.co/google/flan-t5-base) | `7bcac572ce56db69c1ea7c8af255c5d7c9672fc2` | Apache-2.0 |
 | [stabilityai/sd-vae-ft-mse](https://huggingface.co/stabilityai/sd-vae-ft-mse) | `31f26fdeee1355a5c34592e401dd41e45d25a493` | MIT |
+| Optional distilled decoder: [madebyollin/taesd](https://huggingface.co/madebyollin/taesd) | `614f76814bbe30edbe2e627ace1c2234c81a2c0e` | MIT |
 
 Licenses above are the upstream model-card declarations. The Supra repository
 does not include a separate LICENSE file at the pinned revision. The architecture
@@ -89,6 +90,8 @@ presence of `.param` and `.bin` files does not establish correctness.
 ```bash
 ~/venvs/ml/bin/python -m research.supra.export dit \
   --output artifacts/supra/ncnn-fp32
+# Compact storage version used for the CPU runtime:
+~/venvs/ml/bin/python -m research.supra.export dit --fp16-storage
 ```
 
 `--fp16-storage` is an experimental disk-storage compression option. It does not
@@ -127,6 +130,23 @@ HF_HUB_OFFLINE=1 ~/venvs/ml/bin/python -m research.supra.validate_ncnn
 uses four overlapping latent tiles with blended borders; it is a memory/quality
 tradeoff, not numerically equivalent to whole-frame decoding. Full and tiled
 graphs have byte-identical weights, so the runtime bundle stores those once.
+
+`--decoder tiny` substitutes the compatible TAESD distilled decoder for the
+original SD VAE. Supra2's DiT and Flan-T5 text encoder remain unchanged: this is
+one image generator with a different decoding component, not a second image
+generator. The decoder drops from about 49.5M to 1.22M parameters. This is a lossy
+component replacement, not an exact quantization or distillation trained here.
+Compare [decoder samples](results/decoder-comparison.jpg) before choosing it.
+The tiny decoder consumes the already-scaled latent directly; unlike the original
+VAE, its input must **not** be divided by 0.18215.
+
+```bash
+HF_HUB_OFFLINE=1 ~/venvs/ml/bin/python -m research.supra.component_export tiny
+```
+
+`--packed-decoder` enables channel packing for decoding while keeping direct
+convolution, Winograd disabled, and fp32 arithmetic. Its memory/runtime behavior
+must be measured on the target, not inferred from x86 results.
 
 The CPU pipeline's default random generator is NumPy PCG64. The same numeric seed
 does not imply the same initial noise as CUDA PyTorch. Pass `--initial-latent` with

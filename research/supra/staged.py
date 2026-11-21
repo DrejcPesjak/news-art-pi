@@ -20,7 +20,7 @@ def main():
     parser.add_argument("--seed",type=int,default=0)
     parser.add_argument("--threads",type=int,default=3)
     parser.add_argument("--initial-latent",type=Path)
-    parser.add_argument("--decoder",choices=["full","tiled"],default="tiled")
+    parser.add_argument("--decoder",choices=["full","tiled","tiny"],default="tiled")
     parser.add_argument("--memory-mib",type=int,default=0,
                         help="Linux process data/allocation limit; 0 leaves it unchanged")
     parser.add_argument("--packed-decoder",action="store_true")
@@ -102,7 +102,8 @@ def main():
             loaded=time.perf_counter()
             decoded=decode(np.load(args.output/"latent.npy"),args.model_dir,threads=args.threads,packing=args.packed_decoder)
         else:
-            model=NCNNModel(args.model_dir/"vae",threads=args.threads,packing=args.packed_decoder)
+            prefix="tiny" if args.decoder=="tiny" else "vae"
+            model=NCNNModel(args.model_dir/prefix,threads=args.threads,packing=args.packed_decoder)
             loaded=time.perf_counter()
             decoded=model(np.load(args.output/"latent.npy"))
         pixels=np.rint((np.clip(decoded[0],-1,1)+1)*127.5).transpose(1,2,0).astype(np.uint8)
