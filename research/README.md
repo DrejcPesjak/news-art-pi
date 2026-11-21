@@ -1,7 +1,8 @@
 # Supra2 experiments
 
-These experiments run separately from the Pi's production slideshow. The demo
-backend and deployment branch do not depend on PyTorch or these research packages.
+The host-side experiments use PyTorch, Transformers, and Diffusers. Production
+uses the staged CPU module with NCNN, NumPy, SentencePiece, and Pillow; it does
+not require the host-side ML stack.
 Weights and full-resolution experiment outputs are excluded from Git.
 
 ## Environment
@@ -161,7 +162,8 @@ No prompt/result API or remote generator is used.
 On this Pi the experiment checkout and weights are under
 `~/.local/share/news-art-pi/{research-checkout,supra-models}`. Python imports NCNN
 only when `PYTHONPATH=$HOME/.local/share/news-art-pi/ncnn-runtime` is explicitly
-set. The production slideshow has no such override and keeps using demo images.
+set. Production instead uses `/opt/news-art-pi/runtime` and the verified model link
+`/var/lib/news-art-pi/models/supra`, installed by `deployment/install-models.sh`.
 The experiment also requires system packages `python3-numpy`, `python3-pil`, and
 `python3-sentencepiece`. The target does not need uv, CUDA, PyTorch, Transformers,
 Diffusers, or a Hugging Face/GitHub login.

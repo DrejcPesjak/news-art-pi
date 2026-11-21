@@ -122,7 +122,7 @@ event itself occurred. Allowed range: **1–168 hours**.
 | `72` | More options for quieter topics |
 | `168` | Last week |
 
-`display.refresh_seconds` controls the interval between successful updates:
+`display.refresh_seconds` sets the target interval between job starts:
 
 | Value | Interval |
 | --- | --- |
@@ -154,14 +154,28 @@ style = "A realistic editorial illustration, natural lighting, detailed composit
 # style = "A detailed clay miniature photographed with shallow depth of field."
 ```
 
-**Currently this only changes the saved prompt, not the three demo images.** The
-future model backend will receive this instruction followed by the selected
-headline and the instruction `No text or lettering.` Model results will depend
+With `backend = "supra"`, this affects the next generated picture. The model
+receives this instruction followed by the selected headline and
+`No text or lettering.` Model results will depend
 on its capabilities; writing a style is not a guarantee it can reproduce it.
 
-Leave `backend = "demo"` until another backend is implemented. The only supported
-backend today is `demo`. Leave `image_size = 256` for the planned Supra2 baseline.
-The demo backend accepts 64–1024 pixels but that does not establish the future
-model's supported resolutions. Originals in `imgs/` are preserved.
+`backend = "supra"` is the production default. It uses Supra2 with the compatible
+TAESD distilled decoder, entirely on the Pi. `backend = "demo"` switches back to
+rotating the three supplied pictures; style changes do not affect demo artwork.
+Supra requires `image_size = 256`; demo accepts 64–1024. Originals are preserved.
+
+| Generation setting | Default | Effect |
+| --- | --- | --- |
+| `steps` | `25` | Sampling steps (1–100). Fewer is faster with less detail. |
+| `guidance` | `3.0` | Prompt guidance (1–10); the measured preset uses 3. |
+| `seed` | `0` | Base seed; poster sequence is added for variety. |
+| `threads` | `4` | CPU threads; four was measured on this Pi. |
+| `memory_mib` | `480` | Per-stage Linux allocation limit. |
+| `timeout_seconds` | `900` | Stop the entire pipeline if a job takes too long. |
+
+A measured 25-step run took about 9½ minutes. Refreshes are scheduled from job
+start; if a job exceeds the interval, the next job starts after it finishes.
+No overlapping generation jobs are started. The previous poster stays visible
+on a failure or while a new illustration is prepared.
 
 `display.title` is free text for the small heading above the poster.

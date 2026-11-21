@@ -150,16 +150,13 @@ provide more scheduling margin, with a quality tradeoff. GPU timings above must
 not be extrapolated to ARM. Four laptop prompts and one uninterrupted 25-step Pi trial are a
 small engineering sample, not a broad quality or reliability evaluation.
 
-### Deployment status and next integration
+### Deployment status at the end of the research trial
 
-The public repository's `main` contains the experiments, numerical validation,
-portable bundle builder, commands, and results. The active `deploy` branch still
-runs the original RSS/demo-image application; the three supplied pictures keep
-cycling. These experiments do **not** switch the production generator backend.
+At the end of the 21 November research trial, `main` contained these experiments
+and `deploy` still ran the demo slideshow. The 22 November integration connects
+this runtime to live headlines; see the current [application README](../README.md).
 
-The next application change is to connect this measured runtime to headline
-prompts and configuration, place runtime dependencies/models outside the service's
-protected home directory, and schedule refreshes from job start time rather than
-sleeping ten minutes after generation ends. Keep generation bounded and retain
-the last successful poster. Unattended service logging should use the local
-journal rather than an SSH-attached pipe.
+The integration uses service-readable models/runtime paths, bounds inference
+with an allocation limit and a process-group timeout, and measures refreshes from
+job start time. It retains the previous poster until successful publication and
+logs locally through the service journal.

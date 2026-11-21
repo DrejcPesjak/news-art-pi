@@ -4,11 +4,11 @@ A self-contained Raspberry Pi news display. One Google News RSS feed, a new
 headline every ten minutes, and a fullscreen HDMI poster. No API keys, paid
 services, browser, or laptop needed at runtime.
 
-The first release rotates three supplied demo images. They are unrelated to the
-headlines and clearly labelled. The generator produces 256 × 256 RGB images,
-preserving the original artwork with padding. The original files stay in `imgs/`.
-The production display still uses demo images. Laptop Supra2 benchmarks and ARM
-runtime experiments are documented in [research/README.md](research/README.md).
+The Pi generates 256 × 256 illustrations locally with Supra2, a Flan-T5 text
+encoder, and the compatible distilled TAESD decoder. Models load sequentially
+through NCNN to fit the Pi 2 B's RAM. A measured 25-step run took 9 min 30 s;
+[research results](research/RESULTS.md) include quality comparisons and limits.
+The last successful poster stays visible while the next image is generated.
 
 ## Change topics or art style
 
@@ -25,9 +25,15 @@ country = "US"            # Feed edition, not a strict country-of-story filter
 max_age_hours = 48
 
 [generation]
-backend = "demo"
+backend = "supra"
 image_size = 256
 style = "A realistic editorial illustration, natural lighting, detailed composition."
+steps = 25
+guidance = 3.0
+seed = 0
+threads = 4
+memory_mib = 480
+timeout_seconds = 900
 
 [display]
 refresh_seconds = 600
@@ -41,10 +47,15 @@ story links are retained. No article scraping or full-text downloading is used.
 The empty query covers general US-edition and international news. Leave language
 as English when searching Spain if you want English headlines.
 
-`style` is included in each stored prompt, ready for the future model backend.
-It does not change the demo artwork. All three images cycle in sorted filename
-order; story selection favors unseen recent headlines. Once the feed is exhausted,
-stories can repeat. Failed refreshes keep the last poster and retry after a minute.
+`style` is prepended to each headline and affects the next generated illustration.
+The saved state retains its exact prompt and seed. Seeds advance with each poster.
+Story selection favors unseen recent headlines; stories can repeat once the feed
+is exhausted. Network or generation failures keep the previous image and retry
+in a minute. Jobs never overlap. The ten-minute interval is measured from job
+start, so a 9½-minute generation does not become a 19½-minute refresh.
+
+Set `backend = "demo"` to rotate the three original pictures instead. Originals
+remain in `imgs/`; only the demo backend pads them into equal-sized squares.
 
 ## Local development
 
@@ -56,7 +67,8 @@ sudo apt-get install python3-pil python3-pil.imagetk python3-tk
 # Python 3.10 only: sudo apt-get install python3-tomli
 python3 -m unittest discover -s tests -v
 python3 -m news_art.worker --check
-python3 -m news_art.worker --once
+# For a laptop display preview, copy config.toml to config.local.toml and set backend = "demo".
+python3 -m news_art.worker --config config.local.toml --once
 python3 -m news_art.display --windowed
 ```
 
@@ -85,8 +97,8 @@ git push origin main:deploy
 
 The Pi polls the public repository over HTTPS every two minutes, validates the
 candidate on-device, atomically switches releases, and restarts the worker and
-active display. Configuration changes therefore take effect within about two
-minutes. No GitHub login or deploy key is needed on the Pi. The laptop can be off.
+active display. An accepted update begins a new generation within about two minutes. Its image
+appears when generation finishes; the previous poster stays visible meanwhile. No GitHub login or deploy key is needed on the Pi. The laptop can be off.
 All code pushed to `deploy` is trusted executable code on the Pi: treat that branch
 as production. Run the local checks before pushing; the updater repeats the tests
 and asset/configuration validation on the Pi before activating every release.
@@ -106,6 +118,8 @@ passwords and does not require a GitHub account on the Pi:
 ```bash
 git clone --branch deploy https://github.com/DrejcPesjak/news-art-pi.git
 cd news-art-pi
+# First install the native runtime and a verified model bundle (see below),
+# or publish a backend = "demo" configuration to deploy first.
 sudo bash deployment/install.sh "$USER" https://github.com/DrejcPesjak/news-art-pi.git
 ```
 
@@ -114,6 +128,35 @@ run `bash /opt/news-art-pi/current/deployment/start-display.sh` **in a desktop
 terminal**. News fetching starts at boot independently of the desktop. Connecting
 a different HDMI monitor needs no config change; reboot if the desktop does not
 pick up its resolution. Keep using a supply and cable that report no undervoltage.
+
+## Native runtime and model installation
+
+The current Pi is bootstrapped already. Its production models live under
+`/var/lib/news-art-pi/models/supra` (an atomic link to a verified version), and the
+NCNN Python package lives in `/opt/news-art-pi/runtime`. These paths work with the
+worker service's protected filesystem. PyTorch and the laptop are not needed.
+
+For a fresh Pi, build a portable bundle using [the research commands](research/README.md),
+transfer it plus an NCNN wheel installed into a directory for the target's Python
+and ARM architecture, and run once:
+
+```bash
+sudo bash deployment/install-models.sh "$USER" /path/to/verified-bundle /path/to/ncnn-runtime
+```
+
+This verifies checksums, installs system NumPy/SentencePiece, and copies model
+assets into a versioned service-readable directory. Model weights stay outside
+Git. Routine code, filters, style, and sampling changes only need a push to
+`deploy`; package or model replacements require this maintenance bootstrap.
+
+`python3 -m news_art.worker --check` is an offline configuration/demo-asset check
+that works on the laptop. `--check --check-runtime` additionally checks production
+model files and native imports on the Pi without generating an image. The updater
+runs this target check before activating future releases.
+
+The production process uses a 480 MiB Linux allocation limit per inference stage
+and a 900-second overall timeout. On this Pi, memory cgroups are unavailable;
+this is not an exact RSS limit. Timeouts terminate the entire process group.
 
 ## Diagnostics and rollback
 
@@ -124,6 +167,7 @@ journalctl -u news-art-update.service -n 40 --no-pager
 systemctl --user status news-art-display.service
 cat /opt/news-art-pi/current/REVISION
 cat /var/lib/news-art-pi/state.json
+cat /var/lib/news-art-pi/job.json
 vcgencmd get_throttled
 ```
 
@@ -139,7 +183,8 @@ To apply a change immediately: `sudo systemctl start news-art-update.service`.
 ## Structure
 
 - `news_art/news.py`: build and parse the single RSS feed.
-- `news_art/generator.py`: demo backend and configurable prompt builder.
+- `news_art/generator.py`: selectable demo/Supra backend and prompt builder.
+- `news_art/supra.py`: bounded native-runtime adapter and production asset checks.
 - `news_art/worker.py`: schedule, history, atomic image/state publication.
 - `news_art/display.py`: lightweight fullscreen viewer.
 - `deployment/`: initial installation, systemd units, GitHub update/rollback.
