@@ -121,7 +121,7 @@ vcgencmd get_throttled
 
 For a normal rollback, revert the bad commit on `main`, then push `main:deploy`.
 Failed validation leaves the old release running; a detected worker startup or
-display restart-command failure switches back. This is a basic startup check,
+active-display startup failure switches back. This is a basic startup check,
 not a guarantee against every later runtime or display failure. Previous releases
 remain under `/opt/news-art-pi/releases/` for emergency SSH recovery.
 

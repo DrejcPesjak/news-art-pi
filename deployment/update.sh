@@ -27,9 +27,13 @@ switch_release() {
 }
 restart_display() {
     uid=$(id -u "$PI_USER")
-    runuser -u "$PI_USER" -- env XDG_RUNTIME_DIR="/run/user/$uid" \
-        DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
-        systemctl --user try-restart news-art-display.service
+    user_systemctl=(runuser -u "$PI_USER" -- env XDG_RUNTIME_DIR="/run/user/$uid"
+        DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" systemctl --user)
+    if "${user_systemctl[@]}" is-active --quiet news-art-display.service; then
+        "${user_systemctl[@]}" restart news-art-display.service
+        sleep 3
+        "${user_systemctl[@]}" is-active --quiet news-art-display.service
+    fi
 }
 switch_release "$release"
 systemctl restart news-art.service

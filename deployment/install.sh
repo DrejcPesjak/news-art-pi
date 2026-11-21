@@ -15,7 +15,8 @@ install -d "$base/releases"
 if [[ ! -d "$base/repository" ]]; then
     git clone --bare --depth=1 --branch deploy "$REPO_URL" "$base/repository"
 fi
-revision=$(git -C "$base/repository" rev-parse refs/heads/deploy)
+git -C "$base/repository" fetch --quiet --depth=1 origin deploy
+revision=$(git -C "$base/repository" rev-parse FETCH_HEAD)
 release="$base/releases/$revision"
 mkdir -p "$release"
 git -C "$base/repository" archive "$revision" | tar -x -C "$release"
