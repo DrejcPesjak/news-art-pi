@@ -11,6 +11,9 @@ Supra2 inference and optimization are a later phase; no model is installed yet.
 
 ## Change topics or art style
 
+See [FILTERS.md](FILTERS.md) for topic examples, query syntax, language/edition
+settings, art instructions, and the complete configuration reference.
+
 Edit `config.toml`:
 
 ```toml
@@ -63,6 +66,10 @@ window to return to the desktop. The layout adapts to monitor resolution.
 ## GitHub deployment
 
 `main` is the development branch; **`deploy` is what the Pi runs**. Normal workflow:
+
+**Pushing only to `main` does not update the Pi.** Publish the tested `main` commit
+to `deploy` with `git push origin main:deploy`. Editing `deploy` directly also works,
+but merge those changes back into `main` before the next normal deployment.
 
 ```bash
 git switch main
