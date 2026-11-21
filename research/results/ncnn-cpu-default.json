@@ -1,0 +1,35 @@
+{
+  "total_seconds": 9.686374093002087,
+  "steps": 25,
+  "prompt": "a sea jellyfish floating in the pitch-black ocean depths",
+  "machine": "x86_64",
+  "stages": {
+    "encode": {
+      "stage": "encode",
+      "load_seconds": 0.36410469399925205,
+      "compute_seconds": 0.0767470040009357,
+      "total_seconds": 0.44085169800018775,
+      "peak_rss_mib": 495.06640625,
+      "threads": 4,
+      "machine": "x86_64"
+    },
+    "sample": {
+      "stage": "sample",
+      "load_seconds": 0.235826158997952,
+      "compute_seconds": 7.089746526002273,
+      "total_seconds": 7.325572685000225,
+      "peak_rss_mib": 490.95703125,
+      "threads": 4,
+      "machine": "x86_64"
+    },
+    "decode": {
+      "stage": "decode",
+      "load_seconds": 0.2836612069986586,
+      "compute_seconds": 1.1747188730005291,
+      "total_seconds": 1.4583800799991877,
+      "peak_rss_mib": 1680.90234375,
+      "threads": 4,
+      "machine": "x86_64"
+    }
+  }
+}

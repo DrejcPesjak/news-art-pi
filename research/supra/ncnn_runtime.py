@@ -16,6 +16,13 @@ class NCNNModel:
         self.net.opt.use_bf16_storage = False
         self.net.opt.use_int8_inference = False
         self.net.opt.use_packing_layout = False
+        # Winograd/SGEMM convolution transforms made the VAE peak at 1.64 GiB
+        # on x86. Direct convolution trades speed for a Pi-compatible workspace.
+        self.net.opt.use_winograd_convolution = False
+        self.net.opt.use_winograd23_convolution = False
+        self.net.opt.use_winograd43_convolution = False
+        self.net.opt.use_winograd63_convolution = False
+        self.net.opt.use_sgemm_convolution = False
         if self.net.load_param(prefix+".ncnn.param") != 0:
             raise RuntimeError(f"NCNN could not load graph {prefix}")
         if self.net.load_model(prefix+".ncnn.bin") != 0:
