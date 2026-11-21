@@ -5,6 +5,6 @@ systemctl --user import-environment DISPLAY XAUTHORITY WAYLAND_DISPLAY XDG_SESSI
 if command -v xset >/dev/null; then
     xset s off -dpms 2>/dev/null || true
 fi
-systemctl --user reset-failed news-art-display.service
+systemctl --user reset-failed news-art-display.service 2>/dev/null || true
 systemctl --user restart news-art-display.service
 
