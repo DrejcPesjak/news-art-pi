@@ -26,6 +26,10 @@ class Display:
         self.root.bind("<Configure>", self.resized)
         self.resize_job = None
         self.root.after(200, self.poll)
+        # At desktop login XWayland/the compositor can map the first window after
+        # the initial fullscreen request. Reapply once after the window is mapped.
+        if fullscreen:
+            self.root.after(1500, lambda: self.root.attributes("-fullscreen", True))
 
     def resized(self, event):
         if event.widget == self.root:
