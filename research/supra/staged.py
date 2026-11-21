@@ -20,6 +20,7 @@ def main():
     parser.add_argument("--seed",type=int,default=0)
     parser.add_argument("--threads",type=int,default=3)
     parser.add_argument("--initial-latent",type=Path)
+    parser.add_argument("--decoder",choices=["full","tiled"],default="tiled")
     args=parser.parse_args()
     if args.steps<1 or not 1<=args.threads<=16:
         raise ValueError("Require positive steps and 1–16 threads")
@@ -33,12 +34,12 @@ def main():
                      "--model-dir",str(args.model_dir),"--output",str(args.output),
                      "--prompt",args.prompt,"--steps",str(args.steps),
                      "--guidance",str(args.guidance),"--seed",str(args.seed),
-                     "--threads",str(args.threads)]
+                     "--threads",str(args.threads),"--decoder",args.decoder]
             if args.initial_latent:
                 command.extend(["--initial-latent",str(args.initial_latent)])
             subprocess.run(command,check=True)
         summary={"total_seconds":time.perf_counter()-started,"steps":args.steps,
-                 "prompt":args.prompt,"machine":platform.machine(),
+                 "prompt":args.prompt,"machine":platform.machine(),"decoder":args.decoder,
                  "stages":{stage:json.loads((args.output/(stage+".json")).read_text())
                            for stage in ["encode","sample","decode"]}}
         (args.output/"result.json").write_text(json.dumps(summary,indent=2)+"\n")
@@ -73,7 +74,7 @@ def main():
         loaded=time.perf_counter()
         dt=np.float32(1/args.steps)
         for index in range(args.steps):
-            t=np.array([index*float(dt)],dtype=np.float32)
+            t=np.array([index*(1.0/args.steps)],dtype=np.float32)
             conditioned=model(z,t,conditional["context"],conditional["mask"],scalar_inputs=(1,))
             if args.guidance>1:
                 unconditioned=model(z,t,unconditional["context"],unconditional["mask"],scalar_inputs=(1,))
@@ -87,7 +88,7 @@ def main():
         np.save(args.output/"latent.npy",z)
     else:
         from PIL import Image
-        if (args.model_dir/"vae_tile20.ncnn.param").exists():
+        if args.decoder=="tiled":
             from .tiled_decode import decode
             loaded=time.perf_counter()
             decoded=decode(np.load(args.output/"latent.npy"),args.model_dir,threads=args.threads)

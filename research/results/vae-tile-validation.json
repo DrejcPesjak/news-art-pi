@@ -1,0 +1,12 @@
+{
+  "component": "vae_tile20",
+  "machine": "x86_64",
+  "threads": 4,
+  "load_seconds": 0.19524054100111243,
+  "forward_seconds": 2.2573764259977906,
+  "peak_rss_mib": 474.37109375,
+  "relative_rmse": 0.00043254726525260263,
+  "max_abs_error": 0.0009696111083030701,
+  "passed": true,
+  "note": "One component forward, not a complete generated image."
+}
