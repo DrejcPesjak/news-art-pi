@@ -10,7 +10,7 @@ home_dir=$(getent passwd "$PI_USER" | cut -d: -f6)
 base=/opt/news-art-pi
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y git python3-pil python3-pil.imagetk python3-tk fonts-dejavu-core
+apt-get install -y git python3-pil python3-pil.imagetk python3-tk fonts-dejavu-core python3-numpy python3-sentencepiece
 install -d "$base/releases"
 if [[ ! -d "$base/repository" ]]; then
     git clone --bare --depth=1 --branch deploy "$REPO_URL" "$base/repository"

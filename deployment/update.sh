@@ -20,7 +20,7 @@ printf '%s\n' "$revision" > "$release/REVISION"
 # Validate every candidate on the Pi before changing the active release.
 cd "$release"
 runuser -u "$PI_USER" -- /usr/bin/python3 -m unittest discover -s tests -v
-runuser -u "$PI_USER" -- /usr/bin/python3 -m news_art.worker --check
+runuser -u "$PI_USER" -- /usr/bin/python3 -m news_art.worker --check --check-runtime
 switch_release() {
     ln -sfn "$1" "$base/current.next"
     mv -Tf "$base/current.next" "$base/current"

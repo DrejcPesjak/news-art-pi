@@ -15,6 +15,12 @@ STORY = {"id": "story1", "headline": "A test headline", "source": "Example News"
          "published": NOW.isoformat(), "url": "https://example.com/story"}
 
 
+def demo_config():
+    config = load()
+    config["generation"]["backend"] = "demo"
+    return config
+
+
 class PipelineTests(unittest.TestCase):
     def test_feed_filter_is_one_encoded_google_feed(self):
         news = load()["news"]
@@ -34,7 +40,7 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(stories[0]["headline"], "A & B")
 
     def test_all_three_demo_images_are_square_and_distinct(self):
-        images = [generate(STORY, load()["generation"], i)[0] for i in range(4)]
+        images = [generate(STORY, demo_config()["generation"], i)[0] for i in range(4)]
         self.assertTrue(all(image.size == (256, 256) and image.mode == "RGB" for image in images))
         self.assertEqual(len({image.tobytes() for image in images[:3]}), 3)
         self.assertEqual(images[0].tobytes(), images[3].tobytes())
@@ -44,7 +50,7 @@ class PipelineTests(unittest.TestCase):
 
     def test_history_rotation_persists_and_failure_keeps_previous_poster(self):
         with tempfile.TemporaryDirectory() as temp:
-            directory, config = Path(temp), load()
+            directory, config = Path(temp), demo_config()
             first = cycle(config, directory, [STORY])
             second_story = dict(STORY, id="story2", headline="Another headline")
             second = cycle(config, directory, [STORY, second_story])

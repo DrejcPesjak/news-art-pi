@@ -97,7 +97,9 @@ class Display:
                            text=f'{state["story"]["source"]}  /  {published}  /  Updated {updated}',
                            font=("DejaVu Sans", header_size))
         canvas.create_text(pad, h-pad*.55, anchor="sw", fill=ACCENT, width=w-2*pad,
-                           text="DEMO IMAGE · Unrelated to the headline · Local generation coming next",
+                           text=("AI-generated illustration · Supra2 · Not a documentary photograph"
+                                 if state.get("backend") == "supra" else
+                                 "DEMO IMAGE · Unrelated to the headline"),
                            font=("DejaVu Sans", max(8, header_size-1)))
 
 

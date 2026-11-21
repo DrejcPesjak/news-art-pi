@@ -9,10 +9,17 @@ country = "US"
 max_age_hours = 48
 
 [generation]
-backend = "demo"
+backend = "supra"
 image_size = 256
-# Used to build prompts now; the demo images do not change with this setting.
+# Free-text instruction prepended to the selected headline.
 style = "A realistic editorial illustration, natural lighting, detailed composition."
+# Local Supra2 + distilled decoder; these defaults were measured on this Pi.
+steps = 25
+guidance = 3.0
+seed = 0
+threads = 4
+memory_mib = 480
+timeout_seconds = 900
 
 [display]
 refresh_seconds = 600
