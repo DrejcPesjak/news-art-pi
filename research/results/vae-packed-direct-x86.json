@@ -1,0 +1,8 @@
+{
+  "mode": "packing, direct convolution, Winograd disabled",
+  "machine": "x86_64",
+  "load_seconds": 0.193117770999379,
+  "forward_seconds": 2.558448834999581,
+  "peak_rss_mib": 657.15625,
+  "relative_rmse": 0.0004560537345241755
+}

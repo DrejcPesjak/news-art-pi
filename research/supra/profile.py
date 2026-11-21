@@ -17,6 +17,7 @@ def main():
     parser.add_argument("--output",type=Path,required=True)
     parser.add_argument("--threads",type=int,default=3)
     parser.add_argument("--memory-mib",type=int,default=0)
+    parser.add_argument("--packing",action="store_true")
     args=parser.parse_args()
     if args.memory_mib:
         limit=args.memory_mib*2**20
@@ -24,14 +25,14 @@ def main():
     fixture=np.load(args.model_dir/(args.component+"-fixture.npz"))
     inputs=[fixture[name] for name in sorted(fixture.files) if name.startswith("in")]
     start=time.perf_counter()
-    model=NCNNModel(args.model_dir/args.component,threads=args.threads)
+    model=NCNNModel(args.model_dir/args.component,threads=args.threads,packing=args.packing)
     loaded=time.perf_counter()
     actual=model(*inputs,scalar_inputs=(1,) if args.component=="dit" else ())
     done=time.perf_counter()
     expected=fixture["expected"]
     rmse=float(np.sqrt(np.mean((actual-expected)**2)))
     relative=rmse/max(float(np.sqrt(np.mean(expected**2))),1e-8)
-    report={"component":args.component,"machine":platform.machine(),"threads":args.threads,
+    report={"component":args.component,"machine":platform.machine(),"threads":args.threads,"packing":args.packing,
             "load_seconds":loaded-start,"forward_seconds":done-loaded,
             "peak_rss_mib":resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024,
             "relative_rmse":relative,"max_abs_error":float(np.max(np.abs(actual-expected))),

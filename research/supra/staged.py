@@ -23,6 +23,7 @@ def main():
     parser.add_argument("--decoder",choices=["full","tiled"],default="tiled")
     parser.add_argument("--memory-mib",type=int,default=0,
                         help="Linux process data/allocation limit; 0 leaves it unchanged")
+    parser.add_argument("--packed-decoder",action="store_true")
     args=parser.parse_args()
     if args.steps<1 or not 1<=args.threads<=16:
         raise ValueError("Require positive steps and 1–16 threads")
@@ -43,9 +44,11 @@ def main():
                      "--memory-mib",str(args.memory_mib)]
             if args.initial_latent:
                 command.extend(["--initial-latent",str(args.initial_latent)])
+            if args.packed_decoder:
+                command.append("--packed-decoder")
             subprocess.run(command,check=True)
         summary={"total_seconds":time.perf_counter()-started,"steps":args.steps,
-                 "prompt":args.prompt,"machine":platform.machine(),"decoder":args.decoder,
+                 "prompt":args.prompt,"machine":platform.machine(),"decoder":args.decoder,"packed_decoder":args.packed_decoder,
                  "stages":{stage:json.loads((args.output/(stage+".json")).read_text())
                            for stage in ["encode","sample","decode"]}}
         (args.output/"result.json").write_text(json.dumps(summary,indent=2)+"\n")
@@ -97,9 +100,9 @@ def main():
         if args.decoder=="tiled":
             from .tiled_decode import decode
             loaded=time.perf_counter()
-            decoded=decode(np.load(args.output/"latent.npy"),args.model_dir,threads=args.threads)
+            decoded=decode(np.load(args.output/"latent.npy"),args.model_dir,threads=args.threads,packing=args.packed_decoder)
         else:
-            model=NCNNModel(args.model_dir/"vae",threads=args.threads)
+            model=NCNNModel(args.model_dir/"vae",threads=args.threads,packing=args.packed_decoder)
             loaded=time.perf_counter()
             decoded=model(np.load(args.output/"latent.npy"))
         pixels=np.rint((np.clip(decoded[0],-1,1)+1)*127.5).transpose(1,2,0).astype(np.uint8)

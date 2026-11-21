@@ -3,10 +3,10 @@ import numpy as np
 from .ncnn_runtime import NCNNModel
 
 
-def decode(z, model_dir, threads=3):
+def decode(z, model_dir, threads=3, packing=False):
     if z.shape!=(1,4,32,32):
         raise ValueError("Tiled decoder expects one 32×32 latent")
-    model=NCNNModel(model_dir/"vae_tile20",threads=threads)
+    model=NCNNModel(model_dir/"vae_tile20",threads=threads,packing=packing)
     canvas=np.zeros((1,3,256,256),dtype=np.float32)
     normalization=np.zeros((1,1,256,256),dtype=np.float32)
     overlap=64

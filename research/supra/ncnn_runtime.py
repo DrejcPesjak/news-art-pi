@@ -5,7 +5,7 @@ import ncnn
 
 
 class NCNNModel:
-    def __init__(self, prefix, threads=3):
+    def __init__(self, prefix, threads=3, packing=False):
         prefix = str(prefix)
         self.net = ncnn.Net()
         self.net.opt.num_threads = threads
@@ -15,7 +15,7 @@ class NCNNModel:
         self.net.opt.use_fp16_packed = False
         self.net.opt.use_bf16_storage = False
         self.net.opt.use_int8_inference = False
-        self.net.opt.use_packing_layout = False
+        self.net.opt.use_packing_layout = packing
         # Winograd/SGEMM convolution transforms made the VAE peak at 1.64 GiB
         # on x86. Direct convolution trades speed for a Pi-compatible workspace.
         self.net.opt.use_winograd_convolution = False
