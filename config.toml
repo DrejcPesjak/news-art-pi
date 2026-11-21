@@ -1,0 +1,19 @@
+# Edit this file and push to deploy. The Pi applies it automatically.
+[news]
+# One provider: Google News RSS. Empty query = general English US-edition news.
+# Examples: "sports", "Spain", "sports Spain", "science OR technology".
+query = ""
+language = "en-US"
+country = "US"
+max_age_hours = 48
+
+[generation]
+backend = "demo"
+image_size = 256
+# Used to build prompts now; the demo images do not change with this setting.
+style = "A realistic editorial illustration, natural lighting, detailed composition."
+
+[display]
+refresh_seconds = 600
+title = "THE WORLD, REIMAGINED"
+

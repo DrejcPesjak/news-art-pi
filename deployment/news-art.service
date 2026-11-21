@@ -1,0 +1,24 @@
+[Unit]
+Description=News Art Pi headline and image worker
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=@USER@
+WorkingDirectory=/opt/news-art-pi/current
+ExecStart=/usr/bin/python3 -m news_art.worker --state-dir /var/lib/news-art-pi
+Restart=on-failure
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+Environment=LC_ALL=C.UTF-8
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/news-art-pi
+
+[Install]
+WantedBy=multi-user.target
+

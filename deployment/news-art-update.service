@@ -1,0 +1,10 @@
+[Unit]
+Description=Check the public news-art-pi deploy branch
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/news-art-pi/current/deployment/update.sh
+TimeoutStartSec=180
+

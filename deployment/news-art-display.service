@@ -1,0 +1,12 @@
+[Unit]
+Description=News Art Pi fullscreen display
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+[Service]
+WorkingDirectory=/opt/news-art-pi/current
+ExecStart=/usr/bin/python3 -m news_art.display --state-dir /var/lib/news-art-pi
+Restart=on-failure
+RestartSec=10
+Environment=LC_ALL=C.UTF-8
+

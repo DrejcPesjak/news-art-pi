@@ -1,0 +1,12 @@
+[Unit]
+Description=Check GitHub for News Art Pi updates every two minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+RandomizedDelaySec=15
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
