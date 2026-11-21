@@ -21,9 +21,14 @@ def main():
     parser.add_argument("--threads",type=int,default=3)
     parser.add_argument("--initial-latent",type=Path)
     parser.add_argument("--decoder",choices=["full","tiled"],default="tiled")
+    parser.add_argument("--memory-mib",type=int,default=0,
+                        help="Linux process data/allocation limit; 0 leaves it unchanged")
     args=parser.parse_args()
     if args.steps<1 or not 1<=args.threads<=16:
         raise ValueError("Require positive steps and 1–16 threads")
+    if args.memory_mib:
+        limit=args.memory_mib*2**20
+        resource.setrlimit(resource.RLIMIT_DATA,(limit,limit))
     args.output.mkdir(parents=True,exist_ok=True)
     if args.stage=="generate":
         # Keep the supervisor lightweight: numerical libraries are imported only
@@ -34,7 +39,8 @@ def main():
                      "--model-dir",str(args.model_dir),"--output",str(args.output),
                      "--prompt",args.prompt,"--steps",str(args.steps),
                      "--guidance",str(args.guidance),"--seed",str(args.seed),
-                     "--threads",str(args.threads),"--decoder",args.decoder]
+                     "--threads",str(args.threads),"--decoder",args.decoder,
+                     "--memory-mib",str(args.memory_mib)]
             if args.initial_latent:
                 command.extend(["--initial-latent",str(args.initial_latent)])
             subprocess.run(command,check=True)
@@ -102,7 +108,7 @@ def main():
     metrics={"stage":args.stage,"load_seconds":loaded-started,
              "compute_seconds":finished-loaded,"total_seconds":finished-started,
              "peak_rss_mib":resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024,
-             "threads":args.threads,"machine":platform.machine()}
+             "threads":args.threads,"machine":platform.machine(),"data_limit_mib":args.memory_mib}
     (args.output/(args.stage+".json")).write_text(json.dumps(metrics,indent=2)+"\n")
     print(json.dumps(metrics),flush=True)
 

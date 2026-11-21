@@ -16,7 +16,11 @@ def main():
     parser.add_argument("--model-dir",type=Path,required=True)
     parser.add_argument("--output",type=Path,required=True)
     parser.add_argument("--threads",type=int,default=3)
+    parser.add_argument("--memory-mib",type=int,default=0)
     args=parser.parse_args()
+    if args.memory_mib:
+        limit=args.memory_mib*2**20
+        resource.setrlimit(resource.RLIMIT_DATA,(limit,limit))
     fixture=np.load(args.model_dir/(args.component+"-fixture.npz"))
     inputs=[fixture[name] for name in sorted(fixture.files) if name.startswith("in")]
     start=time.perf_counter()

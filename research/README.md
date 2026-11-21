@@ -48,6 +48,9 @@ baseline is seed 0, guidance 3, and 50 Euler sampling steps.
 
 ## Measurement method
 
+See [RESULTS.md](RESULTS.md) for measured timings, memory, sample comparisons,
+and the distinction between conversion validation and image quality.
+
 `supra/prompts.json` defines four fixed prompts. The benchmark compares the
 50-step baseline with native bf16 weights and 50/25/10/5 steps. Seed and guidance
 are fixed. Each precision gets a short CUDA warmup; model loading is timed
@@ -96,3 +99,68 @@ artifact whose validation says `passed: false`.
 Pi feasibility requires all three components, sequential loading to control peak
 RAM, numerical/visual validation, and actual on-device latency measurements. A
 working DiT export alone would not make the Pi self-sufficient for generation.
+
+## Staged CPU pipeline
+
+The text encoder is exported without its large embedding lookup table. The table
+is memory-mapped separately; only prompt rows are gathered into RAM. SentencePiece
+tokenizes locally. Each component then runs in a fresh process so its weight
+memory is released before loading the next. NCNN computes in fp32; compact fp16
+weight files do not imply fp16 arithmetic on ARMv7.
+
+```bash
+# Export the two remaining components after the verified DiT export above:
+HF_HUB_OFFLINE=1 ~/venvs/ml/bin/python -m research.supra.component_export text
+HF_HUB_OFFLINE=1 ~/venvs/ml/bin/python -m research.supra.component_export vae
+HF_HUB_OFFLINE=1 ~/venvs/ml/bin/python -m research.supra.component_export vae --tile-size 20
+# Validate real conditional contexts (requires both fp32 and compact DiT exports):
+HF_HUB_OFFLINE=1 ~/venvs/ml/bin/python -m research.supra.validate_ncnn
+# Bundle only runtime weights/graphs/tokenizer, with integrity checks:
+~/venvs/ml/bin/python -m research.supra.bundle create artifacts/supra/runtime-bundle
+~/venvs/ml/bin/python -m research.supra.bundle verify artifacts/supra/runtime-bundle
+~/venvs/ml/bin/python -m research.supra.staged generate \
+  --model-dir artifacts/supra/runtime-bundle --output artifacts/supra/cpu-image \
+  --steps 25 --threads 4 --decoder tiled
+```
+
+`--decoder full` uses the original whole-frame decoder graph. `--decoder tiled`
+uses four overlapping latent tiles with blended borders; it is a memory/quality
+tradeoff, not numerically equivalent to whole-frame decoding. Full and tiled
+graphs have byte-identical weights, so the runtime bundle stores those once.
+
+The CPU pipeline's default random generator is NumPy PCG64. The same numeric seed
+does not imply the same initial noise as CUDA PyTorch. Pass `--initial-latent` with
+a saved `(1,4,32,32)` float32 `.npy` file for controlled cross-runtime comparisons.
+No prompt/result API or remote generator is used.
+
+On this Pi the experiment checkout and weights are under
+`~/.local/share/news-art-pi/{research-checkout,supra-models}`. Python imports NCNN
+only when `PYTHONPATH=$HOME/.local/share/news-art-pi/ncnn-runtime` is explicitly
+set. The production slideshow has no such override and keeps using demo images.
+The experiment also requires system packages `python3-numpy`, `python3-pil`, and
+`python3-sentencepiece`. The target does not need uv, CUDA, PyTorch, Transformers,
+Diffusers, or a Hugging Face/GitHub login.
+
+The Pi kernel does not currently expose the memory cgroup controller. Systemd
+accepts `MemoryMax`/`MemorySwapMax` but cannot enforce them on this kernel. Use
+`--memory-mib 480` to bound each process's Linux data/anonymous-allocation segment
+with `RLIMIT_DATA`. This is not an exact RSS limit and does not forbid OS swapping;
+shared libraries and file-backed mappings are accounted differently. The time
+limit and low scheduling priority below are independently enforced.
+
+For example, from the checkout directory in an SSH session:
+
+```bash
+systemd-run --user --wait --pipe --collect --unit=news-art-model-trial \
+  -p MemoryMax=520M -p MemorySwapMax=0 -p Nice=10 -p RuntimeMaxSec=1200 \
+  -p WorkingDirectory="$PWD" \
+  /usr/bin/env PYTHONPATH="$HOME/.local/share/news-art-pi/ncnn-runtime" \
+  /usr/bin/python3 -m research.supra.staged generate \
+  --model-dir "$HOME/.local/share/news-art-pi/supra-models" \
+  --output "$HOME/.local/share/news-art-pi/supra-results/image" \
+  --steps 10 --threads 4 --decoder tiled --memory-mib 480
+```
+
+Reports separate model loading, computation, and per-stage peak RSS. The process
+data limit is inherited by child processes; the heavyweight stages do not overlap.
+A failed experiment does not modify the production display's state or services.
