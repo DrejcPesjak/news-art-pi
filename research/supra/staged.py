@@ -87,9 +87,14 @@ def main():
         np.save(args.output/"latent.npy",z)
     else:
         from PIL import Image
-        model=NCNNModel(args.model_dir/"vae",threads=args.threads)
-        loaded=time.perf_counter()
-        decoded=model(np.load(args.output/"latent.npy"))
+        if (args.model_dir/"vae_tile20.ncnn.param").exists():
+            from .tiled_decode import decode
+            loaded=time.perf_counter()
+            decoded=decode(np.load(args.output/"latent.npy"),args.model_dir,threads=args.threads)
+        else:
+            model=NCNNModel(args.model_dir/"vae",threads=args.threads)
+            loaded=time.perf_counter()
+            decoded=model(np.load(args.output/"latent.npy"))
         pixels=np.rint((np.clip(decoded[0],-1,1)+1)*127.5).transpose(1,2,0).astype(np.uint8)
         Image.fromarray(pixels).save(args.output/"image.png")
     finished=time.perf_counter()

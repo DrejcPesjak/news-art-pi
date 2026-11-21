@@ -85,10 +85,12 @@ def main():
     parser.add_argument("component",choices=["text","vae"])
     parser.add_argument("--output",type=Path,default=ROOT/"artifacts/supra/ncnn")
     parser.add_argument("--fp32-storage",action="store_true")
+    parser.add_argument("--tile-size",type=int,default=32)
     args=parser.parse_args()
     args.output.mkdir(parents=True,exist_ok=True)
     torch.set_num_threads(4);torch.manual_seed(0)
-    prefix=args.output/args.component
+    label=f"vae_tile{args.tile_size}" if args.component=="vae" and args.tile_size!=32 else args.component
+    prefix=args.output/label
     if args.component=="text":
         text=T5EncoderModel.from_pretrained(MODEL_DIR/"text",local_files_only=True,
                                             dtype=torch.float32,attn_implementation="eager").eval().requires_grad_(False)
@@ -105,12 +107,12 @@ def main():
     else:
         vae=AutoencoderKL.from_pretrained(MODEL_DIR/"vae",local_files_only=True,torch_dtype=torch.float32).eval().requires_grad_(False)
         vae.encoder=None;vae.quant_conv=None
-        inputs=(torch.randn(1,4,32,32)*.2,)
+        inputs=(torch.randn(1,4,args.tile_size,args.tile_size)*.2,)
         with torch.inference_mode():expected=vae.decode(inputs[0]/VAE_SCALE).sample.numpy()
         vae.set_attn_processor(VAEAttentionProcessor())
         model=DecoderCore(vae).eval()
         with torch.inference_mode():rewritten=model(*inputs).numpy()
-        np.savez(args.output/"vae-fixture.npz",in0=inputs[0].numpy(),expected=expected)
+        np.savez(args.output/(label+"-fixture.npz"),in0=inputs[0].numpy(),expected=expected)
     rewrite_rmse=float(np.sqrt(np.mean((expected-rewritten)**2)))
     rewrite_relative=rewrite_rmse/max(float(np.sqrt(np.mean(expected**2))),1e-8)
     print('Rewrite relative RMSE:',rewrite_relative,flush=True)
@@ -122,11 +124,11 @@ def main():
     seconds=time.perf_counter()-started
     rmse=float(np.sqrt(np.mean((expected-actual)**2)))
     relative=rmse/max(float(np.sqrt(np.mean(expected**2))),1e-8)
-    result={"component":args.component,"rewrite_relative_rmse":rewrite_relative,
+    result={"component":label,"rewrite_relative_rmse":rewrite_relative,
             "ncnn_relative_rmse":relative,"max_abs_error":float(np.max(np.abs(expected-actual))),
             "x86_seconds":seconds,"weights_mib":Path(str(prefix)+".ncnn.bin").stat().st_size/2**20,
             "passed":relative<.01}
-    (args.output/(args.component+"-validation.json")).write_text(json.dumps(result,indent=2)+"\n")
+    (args.output/(label+"-validation.json")).write_text(json.dumps(result,indent=2)+"\n")
     print(json.dumps(result,indent=2),flush=True)
     if not result["passed"]:raise ValueError("NCNN component conversion failed numerical validation")
 
