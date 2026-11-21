@@ -1,0 +1,9 @@
+{
+  "component": "text",
+  "rewrite_relative_rmse": 0.0,
+  "ncnn_relative_rmse": 0.0009452061959226532,
+  "max_abs_error": 0.0006503351032733917,
+  "x86_seconds": 0.08449278700209106,
+  "weights_mib": 162.8235626220703,
+  "passed": true
+}

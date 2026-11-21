@@ -1,9 +1,10 @@
 __pycache__/
 *.py[cod]
-.venv/
+.venv
 test-env/
 state/
 models/
+artifacts/
 .env
 *.pem
 

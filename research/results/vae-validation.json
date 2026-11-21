@@ -1,0 +1,9 @@
+{
+  "component": "vae",
+  "rewrite_relative_rmse": 4.335153605439003e-06,
+  "ncnn_relative_rmse": 0.0004541746645443123,
+  "max_abs_error": 0.001121222972869873,
+  "x86_seconds": 1.1893828320025932,
+  "weights_mib": 94.46725082397461,
+  "passed": true
+}

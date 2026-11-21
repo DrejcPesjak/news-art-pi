@@ -1,0 +1,82 @@
+[
+  {
+    "storage": "ncnn-fp32",
+    "context": "jellyfish",
+    "context_std": 0.13294413685798645,
+    "rmse": 1.4211921097739832e-06,
+    "relative_rmse": 1.8483569080241092e-06,
+    "passed": true
+  },
+  {
+    "storage": "ncnn-fp32",
+    "context": "unconditional",
+    "context_std": 0.08275149762630463,
+    "rmse": 1.5768379171277047e-06,
+    "relative_rmse": 2.0186828924137748e-06,
+    "passed": true
+  },
+  {
+    "storage": "ncnn-fp32",
+    "context": "solar",
+    "context_std": 0.1352369487285614,
+    "rmse": 1.3874420119464048e-06,
+    "relative_rmse": 1.7917163417908772e-06,
+    "passed": true
+  },
+  {
+    "storage": "ncnn-fp32",
+    "context": "rocket",
+    "context_std": 0.13582001626491547,
+    "rmse": 1.3773187674814835e-06,
+    "relative_rmse": 1.7763577908530514e-06,
+    "passed": true
+  },
+  {
+    "storage": "ncnn-fp32",
+    "context": "basketball",
+    "context_std": 0.13923849165439606,
+    "rmse": 1.5311353536162642e-06,
+    "relative_rmse": 1.9645181438878488e-06,
+    "passed": true
+  },
+  {
+    "storage": "ncnn",
+    "context": "jellyfish",
+    "context_std": 0.13294413685798645,
+    "rmse": 0.00040929639362730086,
+    "relative_rmse": 0.0005323177713889006,
+    "passed": true
+  },
+  {
+    "storage": "ncnn",
+    "context": "unconditional",
+    "context_std": 0.08275149762630463,
+    "rmse": 0.00043967997771687806,
+    "relative_rmse": 0.0005628824874852681,
+    "passed": true
+  },
+  {
+    "storage": "ncnn",
+    "context": "solar",
+    "context_std": 0.1352369487285614,
+    "rmse": 0.0004100110672879964,
+    "relative_rmse": 0.000529480528374976,
+    "passed": true
+  },
+  {
+    "storage": "ncnn",
+    "context": "rocket",
+    "context_std": 0.13582001626491547,
+    "rmse": 0.00041760981548577547,
+    "relative_rmse": 0.0005386004073924997,
+    "passed": true
+  },
+  {
+    "storage": "ncnn",
+    "context": "basketball",
+    "context_std": 0.13923849165439606,
+    "rmse": 0.00042126080370508134,
+    "relative_rmse": 0.0005404972788544323,
+    "passed": true
+  }
+]

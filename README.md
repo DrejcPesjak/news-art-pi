@@ -7,7 +7,8 @@ services, browser, or laptop needed at runtime.
 The first release rotates three supplied demo images. They are unrelated to the
 headlines and clearly labelled. The generator produces 256 × 256 RGB images,
 preserving the original artwork with padding. The original files stay in `imgs/`.
-Supra2 inference and optimization are a later phase; no model is installed yet.
+The production display still uses demo images. Laptop Supra2 benchmarks and ARM
+runtime experiments are documented in [research/README.md](research/README.md).
 
 ## Change topics or art style
 
