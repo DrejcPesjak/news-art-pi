@@ -142,7 +142,7 @@ images rotate independently of headline selection.
 Edit `generation.style`. There are no preset names to memorize. Example values:
 
 ```toml
-style = "A realistic editorial illustration, natural lighting, detailed composition."
+style = "oil painting"
 # Other examples; enable only one style line:
 # style = "An expressive oil painting in the style of Picasso."
 # style = "A soft watercolor illustration with warm colors."
@@ -154,10 +154,14 @@ style = "A realistic editorial illustration, natural lighting, detailed composit
 # style = "A detailed clay miniature photographed with shallow depth of field."
 ```
 
-With `backend = "supra"`, this affects the next generated picture. The model
-receives this instruction followed by the selected headline and
-`No text or lettering.` Model results will depend
-on its capabilities; writing a style is not a guarantee it can reproduce it.
+With `backend = "supra"`, this affects the next generated picture. The v3
+converter uses POS noun phrases, NER and WordNet to retain one or two main
+subjects/settings and remove identifying names. Publisher descriptions/opening
+paragraphs are fetched when possible; failures use the headline alone. The style
+is appended directly: `a British swimmer at sea. oil painting`. No concrete noun
+found gives `a scene`. The original headline stays on screen. Shorter captions
+reduced fake lettering in local tests but can lose important meaning; poster or
+newspaper styles may encourage lettering again. Style fidelity is not guaranteed.
 
 `backend = "supra"` is the production default. It uses Supra2 with the compatible
 TAESD distilled decoder, entirely on the Pi. `backend = "demo"` switches back to

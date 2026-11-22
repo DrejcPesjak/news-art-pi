@@ -7,5 +7,6 @@ models/
 artifacts/
 .env
 config.local.toml
+AGENTS.md
 *.pem
 

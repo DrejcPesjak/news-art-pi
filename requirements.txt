@@ -1,2 +1,4 @@
 Pillow>=10
+nltk>=3.9,<4
+lxml>=5,<7
 tomli>=2,<3; python_version < "3.11"

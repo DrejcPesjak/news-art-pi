@@ -27,7 +27,7 @@ max_age_hours = 48
 [generation]
 backend = "supra"
 image_size = 256
-style = "A realistic editorial illustration, natural lighting, detailed composition."
+style = "oil painting"
 steps = 25
 guidance = 3.0
 seed = 0
@@ -43,12 +43,23 @@ title = "THE WORLD, REIMAGINED"
 Google News is the only RSS provider; it aggregates multiple publishers. A query
 selects one search feed instead of the general feed. Query filters are best effort,
 and Google does not guarantee this RSS endpoint as a stable API. Source names and
-story links are retained. No article scraping or full-text downloading is used.
+story links are retained. For the selected article, the Pi makes a best-effort
+publisher request for its description and opening paragraph; blocked or unavailable
+pages fall back to the headline. Google redirect resolution is undocumented and
+can break. Full articles are not archived.
 The empty query covers general US-edition and international news. Leave language
 as English when searching Spain if you want English headlines.
 
-`style` is prepended to each headline and affects the next generated illustration.
-The saved state retains its exact prompt and seed. Seeds advance with each poster.
+The v3 prompt builder uses local NLTK POS/NER and WordNet to prune source text
+to one or two concrete subjects/settings, stripping identifying names. It starts
+with `a` and appends `style`: `a Russian cargo ship hit by a drone. oil painting`.
+Nationality adjectives may survive. This is a short illustration caption, not a
+faithful article summary; roles, actions and context can be lost. If no concrete
+subject is found it uses `a scene`. No extra generative model or paid API is used.
+Caption preparation runs in a separate process that exits before NCNN starts.
+The original headline remains on the display and in saved metadata.
+The saved state retains its exact prompt, seed, and `story.caption` diagnostics,
+including publisher context or fetch failure. Seeds advance with each poster.
 Story selection favors unseen recent headlines; stories can repeat once the feed
 is exhausted. Network or generation failures keep the previous image and retry
 in a minute. Jobs never overlap. The ten-minute interval is measured from job
@@ -142,12 +153,18 @@ and ARM architecture, and run once:
 
 ```bash
 sudo bash deployment/install-models.sh "$USER" /path/to/verified-bundle /path/to/ncnn-runtime
+sudo bash deployment/install-captions.sh "$USER" /path/to/extracted-nltk-data
 ```
 
 This verifies checksums, installs system NumPy/SentencePiece, and copies model
 assets into a versioned service-readable directory. Model weights stay outside
 Git. Routine code, filters, style, and sampling changes only need a push to
 `deploy`; package or model replacements require this maintenance bootstrap.
+Caption bootstrap installs system NLTK/lxml and copies the private `chunkers`,
+`corpora`, and `taggers` resources to `/var/lib/news-art-pi/models/nltk`.
+Required datasets: `averaged_perceptron_tagger_eng`, `maxent_ne_chunker_tab`,
+`words`, and `wordnet`; no runtime downloads are performed. A laptop may use its
+existing `~/.cache/news-art-nltk`, or set `NEWS_ART_NLTK_DATA` explicitly.
 
 `python3 -m news_art.worker --check` is an offline configuration/demo-asset check
 that works on the laptop. `--check --check-runtime` additionally checks production
@@ -184,6 +201,9 @@ To apply a change immediately: `sudo systemctl start news-art-update.service`.
 
 - `news_art/news.py`: build and parse the single RSS feed.
 - `news_art/generator.py`: selectable demo/Supra backend and prompt builder.
+- `news_art/brief_scenes.py`: v3 name-stripped short-caption converter.
+- `news_art/captions.py`: isolated caption process and runtime validation.
+- `news_art/article.py`: best-effort publisher description/opening extraction.
 - `news_art/supra.py`: bounded native-runtime adapter and production asset checks.
 - `news_art/worker.py`: schedule, history, atomic image/state publication.
 - `news_art/display.py`: lightweight fullscreen viewer.

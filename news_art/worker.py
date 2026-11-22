@@ -100,6 +100,8 @@ def main():
     config = load(args.config)
     self_check(config)
     if config["generation"]["backend"] == "supra" and (args.check_runtime or not args.check):
+        from .captions import check_runtime as check_captions
+        check_captions()
         from .supra import check_runtime
         check_runtime()
     if args.check or args.check_runtime:

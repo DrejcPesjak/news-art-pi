@@ -1,14 +1,26 @@
+import logging
 from PIL import Image, ImageOps
 from .config import ROOT
+from .captions import prepare
+
+log = logging.getLogger(__name__)
 
 
-def prompt_for(story, style):
-    return f"{style.strip()}\nIllustrate this news headline: {story['headline']}\nNo text or lettering."
+def prompt_for(story, style, fetch_context=False):
+    report = prepare(story, fetch_context=fetch_context)
+    scene = report["scene"].rstrip(". ")
+    prompt = f"{scene}. {style.strip()}".strip()
+    story["caption"] = {**report, "prompt": prompt}
+    log.info("Caption (%s): %s", report["article"]["status"], prompt)
+    return prompt
 
 
 def generate(story, config, index, state_dir=None):
     """Return an RGB square and its prompt, using the selected local backend."""
-    prompt = prompt_for(story, config["style"])
+    if config.get("backend", "demo") == "supra":
+        prompt = prompt_for(story, config["style"], fetch_context=True)
+    else:
+        prompt = f'{story["headline"]}. {config["style"].strip()}'
     if config.get("backend", "demo") == "supra":
         from .supra import generate as generate_supra
         if state_dir is None:

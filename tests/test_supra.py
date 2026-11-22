@@ -33,13 +33,14 @@ class SupraIntegrationTests(unittest.TestCase):
 
     def test_adapter_passes_prompt_as_one_argument_and_validates_image(self):
         config = load()["generation"]
-        story = dict(STORY, headline="A rocket; $(touch should-never-execute)")
+        story = dict(STORY, headline="An unusual event; $(touch should-never-execute)")
         observed = []
         def pipeline(command, timeout, environment):
             observed.append(command)
             output = Path(command[command.index("--output")+1])
             Image.new("RGB", (256,256), "blue").save(output/"image.png")
-        with tempfile.TemporaryDirectory() as temporary, patch("news_art.supra.run_pipeline", pipeline):
+        caption = {"scene": story["headline"], "article": {"status": "failed"}}
+        with tempfile.TemporaryDirectory() as temporary, patch("news_art.supra.run_pipeline", pipeline), patch("news_art.generator.prepare", return_value=caption):
             image, prompt = generate(story, config, 7, Path(temporary))
             self.assertEqual(image.size, (256,256))
             command = observed[0]
