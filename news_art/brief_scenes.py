@@ -21,6 +21,7 @@ class Pruner:
         self.nltk,self.wn=nltk,wordnet
         if data_dir is not None:
             nltk.data.path[:]=[str(data_dir)]
+        self.ner=nltk.chunk.ne_chunker()
         self.chunker=nltk.RegexpParser(r"NP: {<DT|PRP\$>?<JJ.*|NN.*|CD>*<NN.*>+}")
 
     def concrete(self,word):
@@ -41,7 +42,7 @@ class Pruner:
                  and tagged[i-1][1].startswith("NN") and not self.concrete(w)
                  and self.wn.synsets(w.lower(),pos="v") else t)
                 for i,(w,t) in enumerate(tagged)]
-        entities=self.nltk.ne_chunk(tagged)
+        entities=self.ner.parse(tagged)
         named=set();labels=[];offset=0
         for entity in entities:
             if hasattr(entity,"label"):
