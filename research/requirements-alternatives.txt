@@ -1,0 +1,5 @@
+# Optional laptop comparison tools. Preserve existing shared-environment versions
+# with constraints. Do not uv sync or install the upstream training environment.
+peft==0.22.0
+bitsandbytes==0.50.2
+requests>=2.32,<3

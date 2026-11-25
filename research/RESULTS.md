@@ -1,6 +1,54 @@
 # Supra2 experiment results
 
-Measured on 21 November 2026. This is a small engineering evaluation, not a
+## Brief scene captions, 22 November 2026
+
+Deployment follow-up: at Drew's request, v3 name-stripped captions and oil painting
+were deployed on revision `bebff43`. The production worker shares the same
+converter (`news_art/brief_scenes.py`); all 12 frozen generic prompts matched after
+moving code and reusing the NER classifier within each child process. NLTK/lxml
+and private local NLTK data were installed on the Pi. Heavy NLP preparation runs
+in a child that exits before NCNN starts. Publisher context uses metadata and
+article/main paragraphs instead of laptop trafilatura extraction.
+
+All 15 candidate-release tests and runtime checks passed on the Pi. First live
+poster 135 completed in 629.96 s including publisher fetch/caption preparation,
+with context available. Prompt: `a Sunrise and a box office. oil painting`.
+HDMI inspection confirmed publication, but this first result still has prominent
+pseudo-lettering and the caption retains a word from a movie title. V3 is not a
+complete name-removal or fake-lettering fix. Evidence and exact metadata:
+`artifacts/deployment/captions-v3/first-live-{state.json,image.png,hdmi.png}`.
+Runtime smoke check peak child RSS was 183.4 MiB / 59.67 s while the old Supra
+job was sampling; this is not isolated normal caption latency.
+
+Local Supra2 + TAESD comparison: 12 frozen articles × four prompt variants ×
+two seeds (0/1), 96 rendered images, 256px, 25 steps, CFG 3. All variants use
+the same `oil painting` suffix, so shortening/name removal is compared without
+changing the style. Some named/generic captions coincide and produce duplicate
+images; these are 96 test slots, not 96 distinct prompts. Same initial noise
+within each seed; laptop CUDA noise is not a Pi reproducibility guarantee.
+
+Manual inspection of all six grids shows substantially less prominent fake
+lettering for the brief generic captions, especially crime, soccer, climate
+and phone rows. Anatomy remains poor and the ship's drone impact is not reliably
+depicted. There is no blinded numerical quality rating or broad improvement claim.
+The supplied FBI-list reference still produces an abstract poster for seed 0,
+but a portrait for seed 1; short prompts are not a seed-independent fix.
+
+The automatic extractive converter preserves useful roles in `a Mexican drug
+lord`, `a British swimmer at sea`, and `a couple getting married`. It also loses
+important distinctions: soccer becomes `a trophy and a crowd`; a space capsule
+becomes `a cargo capsule at sea`; `a fossil fuel` produces
+an unhelpful object. Handwritten controls illustrate the remaining gap and are
+not silently substituted into automatic results. NER removes names but cannot
+supply a missing common role or resolve model ambiguity by itself.
+
+Three semantic regression tests pass: retaining a swimmer while stripping names,
+using article context to recover a couple, and avoiding invented marriage for
+an unrelated couple. These grids were generated on the laptop before the
+deployment follow-up above. Evidence:
+`artifacts/supra-brief/index.html`, `prompts.json`, `results.json`, six grids.
+
+The original baseline below was measured on 21 November 2026. This is a small engineering evaluation, not a
 published model-quality benchmark. Raw results and comparison images are in
 [`results/`](results/).
 
@@ -160,3 +208,164 @@ The integration uses service-readable models/runtime paths, bounds inference
 with an allocation limit and a process-group timeout, and measures refreshes from
 job start time. It retains the previous poster until successful publication and
 logs locally through the service journal.
+
+## Local automatic scene-prompt evaluation, 22 November
+
+The overnight feed exposed a frequent failure: large pseudo-lettering on nearly
+empty backgrounds. Added offline topic rules in `news_art/scenes.py` to turn
+recognized headlines into concrete generic scene captions, with an unchanged
+headline fallback for unknown topics. The rules were developed using this
+overnight headline set, so this is a development evaluation, not a held-out test.
+
+Generated 72 laptop CUDA images: 12 selected overnight headlines, seeds 0 and 1,
+and three prompt variants. All use 25 steps, CFG 3 and TAESD. Columns compare
+the old production wrapper/style, the original headline plus a photographic
+style, and the automatic scene plus the same photographic style. The second
+and third columns isolate the scene conversion. The selected poster sequences
+are 79, 78, 28, 36, 34, 68, 48, 52, 40, 29, 65 and 77.
+
+Visual inspection found substantially less prominent pseudo-lettering with the
+converted scenes, especially in the medical, finance, politics, technology and
+swimming examples. Simply changing the wrapper/style often still produced text.
+The scene examples retain visible model errors: distorted people, weak spacecraft
+details, and flooding that can resemble ordinary coastal water. Generic scenes
+omit names, exact locations and event details, and the fixed rules can misclassify
+ambiguous headlines. No OCR score or general quality/success rate is claimed.
+
+Local grids, exact prompts and all-headline rule assignments are in ignored
+`artifacts/scene-comparison/`; reproduce with the command in `research/README.md`.
+All 52 supplied overnight headlines matched a rule, which measures coverage of
+this input set rather than classification correctness. All tested prompts fit
+within 128 tokens. This evaluation changes no model weights or Pi deployment.
+
+## Article-context and NLP evaluation, 22 November
+
+Audited a new 38-item Google News RSS snapshot. Descriptions were related-title
+lists, not usable article abstracts. Resolved 12 selected publisher URLs and
+obtained metadata summaries/opening text from nine. WESH returned HTTP 451;
+AP and NewsNation returned HTTP 403. Those failures remain explicit headline
+fallback cases, not successful context examples. Extraction required filtering
+browser-support boilerplate and repeated title fragments; subtitle metadata can
+be incomplete or promotional even after this filtering.
+
+The prototype combines NLTK sentence segmentation, UDPipe dependency parsing,
+WordNet lexical classes for proposition ranking, and NER diagnostics. Direct
+SVO reconstruction was rejected after it dropped coordinated actions and
+misread "has swum" as possession. Final prompts preserve a selected source
+sentence, with headline fallback for unsuitable parses. NER labels were inspected
+but do not themselves provide a visual scene or the appearance of named people.
+
+Generated **96 laptop CUDA images**: all 12 attempted articles, seeds 0 and 1,
+four prompt variants (headline/style; existing topic template; NLP headline;
+NLP article context). Every row fixes initial noise, 25 steps, CFG 3, and TAESD.
+All prompts fit the context limit; the largest was 54 tokens. Eight research
+checks passed, including negation, coordinated-action preservation, sentence
+segmentation, boilerplate filtering and the existing export checks.
+
+Visual inspection found mixed results. The Dragon capsule/context examples show
+a more recognizable capsule, and wedding context introduces clearer wedding
+clothing in some images. Abstract politics and crime descriptions still produce
+pseudo-lettering or generic portraits; the phone context can be worse than its
+headline. Mercury context still produces lettering. Headline-only NLP changes
+little, and the soccer parse falls back even though article text is available.
+Templates generally produce cleaner illustrative scenes but sacrifice specific
+meaning; the ship-briefing example even matches the broad military template,
+demonstrating the existing rules' brittleness. No automatic image-quality score
+or general improvement rate is claimed.
+
+On the laptop, the combined NLP process loaded in 3.59 s and took 12.68 s for
+24 conversions, with **506.58 MiB process-lifetime peak RSS**. This includes NER
+and WordNet overhead and is not a per-headline memory figure. It has not been
+benchmarked on ARMv7 and is not ready to assume safe concurrent Pi execution.
+Existing shared-environment package versions were verified unchanged.
+
+Full local evidence: `artifacts/context-nlp/images/index.html`, `articles.json`,
+`feed-audit.json`, `nlp-prompts.json`, `nlp-metrics.json`, and
+`assets-environment.json` under `artifacts/context-nlp/`. The source HTML, NLP
+assets and generated images are ignored. No Pi service, model or deployment was
+changed. Context acquisition is feasible but is not, by itself, a reliable fix
+for the model's pseudo-text failure; sentence selection is not equivalent to
+converting news into a concise visual description.
+
+## Alternative generators: completed comparison, 22 November
+
+Tested the requested FLUX.1-Turbo-Alpha, Inko and Surjo-Image-Preview on all 48
+seed-0 prompt slots from the context experiment. There are 32 distinct strings;
+identical prompt/seed outputs are reused. Existing Supra2/TAESD images provide
+the baseline. The final gallery contains **12 complete 4×4 article grids (192
+cells)** plus two 4×4 contact sheets per model. Original resolutions and exact
+prompts/settings are retained; no Pi deployment occurred.
+
+| Generator | Resolution | Steps / guidance | Median inference | Max allocated CUDA |
+| --- | --- | --- | --- | --- |
+| Surjo-Image-Preview | 256² | 50 / 3 | 1.73 s | 894 MiB |
+| Inko | 896² | 20 / 4.5 | 11.22 s | 5102 MiB |
+| FLUX Turbo Alpha, NF4 base/T5 | 512² | 8 / 3.5 | 11.47 s | 7300 MiB |
+
+These are different native/practical recipes, not equal compute or resolution.
+The laptop GPU reached 86°C and reduced clocks during sustained generation;
+timings are descriptive, not controlled performance rankings. Native timings
+include text encoding, sampling and decoding, excluding model loading. FLUX
+stages use separate processes: median encode 0.334 s, sample 10.843 s, decode
+0.245 s. The median of per-image summed stage times is 11.472 s (it need not
+equal the sum of stage medians). FLUX's 7300 MiB figure is its sampling peak;
+encoding peaked at 4583 MiB and decoding at 786 MiB. These peaks do not overlap.
+Process-lifetime CPU RSS peaks were 2544 MiB, 5001 MiB and 7395 MiB respectively;
+they include loading and must not be treated as ARM runtime requirements.
+
+FLUX Turbo Alpha is the requested adapter on FLUX.1-dev, not a standalone small
+model. It ran at 512px with a Diffusers NF4 base and NF4 T5 to fit 8 GiB VRAM,
+below the upstream 1024px example. Verified all **346,972,160 adapter parameters**
+were loaded, nonzero adapter weights were active, and adapter scale was 1.
+Adapter arithmetic/storage remained BF16. No CPU offloading was needed during
+sampling; the encoder and original VAE ran separately. This is a practical
+quantized variant, not a full-precision reference result.
+
+Visual inspection of the distinct-prompt contact sheets found FLUX strongest
+overall in this sample, especially the soccer celebration, burning ship and
+capsule examples. Inko also substantially reduced dominant pseudo-lettering and
+produced more coherent scenes than Supra2, but confused some spacecraft with
+helmet-like objects and did not reliably preserve named identities or gender.
+Surjo improved many scenes but repeated generic portraits on abstract news and
+still produced large fake lettering for soccer and medical headlines. Small
+labels, anatomy and subject/scene errors remain even in the stronger models.
+This is one seed on a small development prompt set, not a general quality score.
+
+Verified every comparison prompt matches the frozen previous experiment, all
+192 cell paths resolve, all 96 new distinct-model PNGs have the declared native
+dimensions, baseline copies are byte-identical, and every FLUX record is complete.
+Existing shared-environment package versions were preserved; only PEFT was added
+for this experiment. Weights are pinned and LFS SHA-256 checked. Sampling code,
+source revisions and reproduction commands are in `research/README.md`.
+
+Evidence: ignored `artifacts/model-comparison/index.html`, `comparison.json`,
+`summary.json`, per-model PNG/JSON files and per-component download manifests.
+No alternative generator is integrated with the production worker or validated
+on the Pi. Laptop image quality and GPU timings do not establish Pi feasibility.
+
+### Inko painting style at 512px
+
+Four frozen headline-only prompts (Mercury, soccer, wedding and ship) were tested
+with `An expressive oil painting, visible brushstrokes, rich colors.` appended.
+Same seed 0, BF16, 20 steps and CFG 4.5; all components remain on the GPU. The
+comparison also reuses the previous photo-style 896px outputs. Eight new images
+were generated; no production settings or weights changed.
+
+| Oil-painting resolution | Median inference | Peak allocated CUDA |
+| --- | --- | --- |
+| 896² | 10.42 s | 5102 MiB |
+| 512² | 3.41 s | 3312 MiB |
+
+The smaller output reduced allocated GPU peak by about 35% and was about 3.1×
+faster in this four-case sample. PyTorch's reserved allocator cache is not this
+metric. Resizing changes latent noise dimensions and the upstream resolution
+time shift, so the same seed need not preserve composition. The painterly style
+remains visible at 512px, with subject errors still present (including sports
+and spacecraft confusion). No broad quality equivalence is claimed.
+
+Measured BF16 parameter storage: generator 532,496,992 parameters / 1015.66 MiB;
+text encoder 596,049,920 / 1136.88 MiB; VAE 126,892,531 / 242.03 MiB. These sum to
+2394.56 MiB (2.34 GiB) before activations/workspace. Lowering image resolution
+does not shrink those weights. Thus 512px alone does not establish a fit within
+the Pi 2's 920 MiB RAM; quantization, staging and an ARM runtime would still need
+investigation. The comparison/measurements live in `artifacts/inko-resolution/`.

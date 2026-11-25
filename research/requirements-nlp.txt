@@ -1,0 +1,6 @@
+# Optional laptop-only context/NLP experiments. Preserve the shared environment's
+# installed versions with constraints. The Pi uses distro NLTK/lxml and the
+# production caption bootstrap, not this UDPipe/Trafilatura research stack.
+nltk==3.10.4
+trafilatura==2.2.0
+ufal.udpipe==1.4.0.1
