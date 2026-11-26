@@ -10,6 +10,8 @@ NumPy/NCNN processes bound memory on the Pi 2 B. The configured ten-minute
 refresh interval is a minimum from job start; a longer generation finishes
 before the next begins. The last successful poster stays visible throughout.
 [Research results](research/RESULTS.md) separate laptop and Pi measurements.
+The first Pi Inko cycle completed in **37m08s**, with **232.4 MiB** largest
+child-process RSS. That is one measured run, not a latency guarantee.
 The previous Supra backend remains available through `config.supra.toml`.
 
 The later Inko compression research has three portable HTML reports:

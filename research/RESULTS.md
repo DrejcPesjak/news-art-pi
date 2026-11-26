@@ -409,3 +409,37 @@ latency, system-memory fit, production integration or HDMI success is claimed.
 Evaluation holds out exact caption strings, not subject categories: synthetic
 training captions cover these subject families. This is not an out-of-domain
 evaluation.
+
+## First completed Inko run on the Pi, 26 November 2026
+
+The Pi 2 B Rev 1.1 (ARMv7, 920 MiB RAM) completed the selected distilled Inko
+recipe at 384px, eight steps, CFG 1, four threads, seed 137. The real-news caption
+was “a judge. oil painting”. The resulting oil-painted portrait was inspected.
+This is one completed engineering sample, not a broad quality or latency claim.
+
+| Stage | Wall time | Peak child RSS |
+| --- | --- | --- |
+| Q8 Qwen text encoding | 51.83 s | 80.52 MiB |
+| Eight-pass Inko sampling | 2071.78 s (34m32s) | 172.17 MiB |
+| Trained tiny decoder | 49.44 s | 232.43 MiB |
+
+The full application cycle, including isolated caption preparation, completed
+in **2227.64 s (37m08s)**. The native pipeline took 2179.42 s (36m19s).
+All stages enforced a 480 MiB allocation limit and loaded none of Torch,
+Transformers or Diffusers. This is not a total-system RAM cap and swapping
+remained enabled. Power was healthy before and after: `throttled=0x0`.
+
+All 17 candidate application tests passed on the Pi. The first caption-runtime
+smoke test timed out while Supra and bundle extraction competed for resources;
+the isolated retry passed. The old supervisor was paused while its active
+Supra child finished, so no Supra sampling overlapped the Inko trial.
+
+The first image was produced through the candidate application adapter at
+revision `30719cc`. Its code is identical to the subsequent deployment aside
+from configuration/documentation. Production promotion uses the completed,
+inspected trial output; the next normal worker cycle advances its sequence.
+
+Machine-readable evidence: [pi-inko-first.json](results/pi-inko-first.json).
+Images, original state, before/after HDMI captures and activation evidence are
+kept locally in `artifacts/deployment/inko-first/`. The roughly 37-minute result
+confirms memory fit and native execution, while making the latency cost explicit.
