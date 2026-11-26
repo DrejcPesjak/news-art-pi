@@ -369,3 +369,43 @@ text encoder 596,049,920 / 1136.88 MiB; VAE 126,892,531 / 242.03 MiB. These sum 
 does not shrink those weights. Thus 512px alone does not establish a fit within
 the Pi 2's 920 MiB RAM; quantization, staging and an ARM runtime would still need
 investigation. The comparison/measurements live in `artifacts/inko-resolution/`.
+
+## Bounded Inko candidate, 26 November 2026
+
+Inko now has a standalone NumPy/NCNN runtime with sequential text, sampling and
+decoding processes. Groupwise packed 4-bit transformer weights (8-bit modulation),
+8-bit Qwen text weights and a mapped embedding table avoid full model residency.
+Multiplication remains FP32; packed storage is not an integer speedup.
+
+A rank-32 adapter trained for 3000 updates on 344 locally generated teacher
+trajectories reduces sampling from 24 guided teacher steps to eight CFG-1
+student steps. A separately trained sixteen-channel Tiny Qwen decoder completed
+6000 updates: 25.05 dB mean PSNR / 0.7996 SSIM on 32 validation images.
+
+The final standalone 384px laptop CPU pipeline completed in 45.92 s. Peak child
+RSS was 127.3 MiB (text), 212.3 MiB (sample), 248.1 MiB (decode); each had RLIMIT_DATA
+480 MiB and imported no Torch/Transformers/Diffusers. Portable transformer
+velocity relative error versus an independent FP32 fixture was 1.97e-6.
+The memory limit is an allocation limit, not a strict RSS or swap cap.
+
+Manual inspection of eight held-out captions with two seeds finds much more
+recognizable scenes than the Supra comparison, while the fast candidate loses
+texture/color versus original guided Inko. Anatomy, extra people, subject
+confusion and pseudo-lettering remain. The original quantized 20-step CFG-4.5
+model and exact decoder are retained as a quality fallback. This is a small
+engineering comparison, not a broad quality benchmark.
+
+Supra typography-subspace weight edits did not show a useful improvement.
+A 244M-parameter block/MLP-pruned Inko remained visually unacceptable after
+6000 recovery updates and is rejected. The successful candidate keeps the
+dense 532M architecture and saves residency and forward passes instead.
+
+Methods, limitations, training interruption/resume and commands are documented
+in [edge_quality/README.md](edge_quality/README.md). Machine-readable evidence
+is [results/edge-quality.json](results/edge-quality.json); the local visual
+report is `artifacts/edge-quality/index.html`. The Pi was disconnected: no ARMv7
+latency, system-memory fit, production integration or HDMI success is claimed.
+
+Evaluation holds out exact caption strings, not subject categories: synthetic
+training captions cover these subject families. This is not an out-of-domain
+evaluation.

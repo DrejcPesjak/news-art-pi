@@ -1,0 +1,522 @@
+{
+  "experiment": "Inko bounded runtime and quality experiments",
+  "date": "2026-11-26",
+  "hardware": "RTX 3070 Laptop 8 GiB development; x86_64 CPU validation",
+  "pi_connected": false,
+  "production_changed": false,
+  "evaluation": {
+    "captions": 8,
+    "seeds": [
+      0,
+      1
+    ],
+    "exact_captions_excluded_from_training": true,
+    "subject_families_present_in_training": true,
+    "broad_quality_benchmark": false,
+    "manual_findings": "Candidate retains many recognizable scenes, loses texture/color; wrong subjects, anatomy, extra people and pseudo-text remain."
+  },
+  "selection": {
+    "variant": "q4-distilled-3000-gptq",
+    "size": 384,
+    "steps": 8,
+    "guidance": 1,
+    "decoder": "tiny-qwen",
+    "transformer_checkpoint": 3000,
+    "decoder_checkpoint": 6000,
+    "selection_basis": "lowest development rollout latent error at completed dense checkpoints; final decoder validation checkpoint",
+    "evaluation_prompts_used_for_training": false,
+    "transformer_manifest_sha256": "bed37ae8263289d5702dc7817ed5afa88f57ee05a5835b7069ce0f365726bbbd",
+    "decoder_metadata_sha256": "4d2804376bd40d98b067d36f99a91b3784102084ce116596f9ad412272bed25e",
+    "fallback": "q4-gptq, 384px, 20 steps, CFG4.5, exact decoder",
+    "rejected": "244M block/MLP-pruned model remained visually inadequate after 6000 recovery updates"
+  },
+  "fallback": {
+    "variant": "q4-gptq",
+    "size": 384,
+    "steps": 20,
+    "guidance": 4.5,
+    "seeds": [
+      0,
+      1
+    ],
+    "manifest_sha256": "072a9205815ae129eef9619ee1496b57472de41067d181b2481bff9255638b13",
+    "reason": "Chosen on development images; 8-bit modulation plus activation-aware 4-bit correction. Lower resolution changes composition and can omit subjects.",
+    "evaluation_prompts_used_for_selection": false
+  },
+  "dataset": {
+    "source_dataset": "kaupane/inko-rollout-25k",
+    "source_revision": "9d9a9b5c0e1c435a793087428ae75c7eb4e75e10",
+    "offsets": [
+      0,
+      1000,
+      2000,
+      3000,
+      4000,
+      5000,
+      6000,
+      7000,
+      8000,
+      9000,
+      10000,
+      11000,
+      12000,
+      13000,
+      14000,
+      15000
+    ],
+    "public_prompts": 192,
+    "total_prompts": 344,
+    "images_downloaded": 0,
+    "caption_processing": "English ASCII fraction >.95; capped at 400 characters; selected typography terms excluded; painting style appended",
+    "prompts_sha256": "47febe28e97c5c3ad05fe0356e3314e2e512bc495ff5ec56985572a967d94dc4"
+  },
+  "dense_training_history": [
+    {
+      "rank": 32,
+      "lr": 0.0001,
+      "steps": 3000,
+      "batch": 2,
+      "trajectories": 344,
+      "trainable_parameters": 19752960,
+      "objective": "MSE to teacher average CFG velocity over each coarse interval",
+      "seed": 777
+    },
+    {
+      "rank": 32,
+      "lr": 5e-05,
+      "steps": 3000,
+      "batch": 2,
+      "trajectories": 344,
+      "trainable_parameters": 19752960,
+      "objective": "MSE to teacher average CFG velocity over each coarse interval",
+      "seed": 777,
+      "resume_step": 1500,
+      "optimizer_restored": false
+    }
+  ],
+  "dense_checkpoint_metrics": [
+    {
+      "step": 0,
+      "mean_latent_relative_rmse": 0.6934402734041214
+    },
+    {
+      "step": 500,
+      "mean_latent_relative_rmse": 0.6091080978512764
+    },
+    {
+      "step": 1000,
+      "mean_latent_relative_rmse": 0.5337907299399376
+    },
+    {
+      "step": 1500,
+      "mean_latent_relative_rmse": 0.5548203960061073
+    },
+    {
+      "step": 2000,
+      "mean_latent_relative_rmse": 0.5153480097651482
+    },
+    {
+      "step": 2500,
+      "mean_latent_relative_rmse": 0.49634237587451935
+    },
+    {
+      "step": 3000,
+      "mean_latent_relative_rmse": 0.47754328697919846
+    }
+  ],
+  "tiny_training": {
+    "parameters": 1229443,
+    "steps": 6000,
+    "batch": 2,
+    "lr": 0.0002,
+    "training": 312,
+    "validation": 32,
+    "base_revision": [
+      "madebyollin/taesd",
+      "614f76814bbe30edbe2e627ace1c2234c81a2c0e"
+    ],
+    "input_channels": 16,
+    "normalized_input": true,
+    "loss": "pixel L1 + .2*(1-SSIM) + .1*finite-difference L1",
+    "seed": 117
+  },
+  "tiny_validation": {
+    "step": 6000,
+    "mean_psnr": 25.052993746590364,
+    "mean_ssim": 0.799608739092946
+  },
+  "tiny_metadata": {
+    "checkpoint": "artifacts/edge-quality/tiny-qwen/decoder-6000.safetensors",
+    "sha256": "1c4188875dd38fbe2b3a680da22feecd6d58e26b92ce77ef647e0288037f839b",
+    "parameters": 1229443,
+    "normalized_input": true,
+    "prefix": "tiny_qwen",
+    "lossy": true,
+    "source_vae_revision": "9cb4c88de60bc7b1865c7f93abc01745992b8784",
+    "initialization_repo": "madebyollin/taesd",
+    "initialization_revision": "614f76814bbe30edbe2e627ace1c2234c81a2c0e"
+  },
+  "rejected_pruned_model": {
+    "parameters": 243830688,
+    "retained_blocks": 13,
+    "mlp_width": 2048,
+    "recovery_steps": 6000,
+    "validation": {
+      "step": 6000,
+      "mean_latent_relative_rmse": 0.835517480969429
+    },
+    "verdict": "Visually inadequate, rejected"
+  },
+  "supra_weight_edit": {
+    "method": "Typography conditioning-subspace projection, ranks 1 and 4, strengths .5 and 1",
+    "verdict": "No convincing development gain; restored control byte-identical"
+  },
+  "numeric_validation": {
+    "variant": "q4-distilled-3000-gptq",
+    "backend": "ncnn",
+    "size": 384,
+    "time": 0.3,
+    "seconds": 8.002523003000533,
+    "peak_rss_mib": 203.06640625,
+    "relative_rmse": 1.969338882190641e-06,
+    "max_abs": 1.3589859008789062e-05
+  },
+  "decoder_validation": [
+    {
+      "latent_size": 32,
+      "seconds": 3.7688210340002115,
+      "relative_rmse": 0.0005855555064044893,
+      "max_abs": 0.008113652467727661,
+      "peak_rss_mib": 126.1171875,
+      "allocation_limit_mib": 480,
+      "full_frame_attention": true,
+      "exact_local_halos": true
+    },
+    {
+      "latent_size": 48,
+      "seconds": 8.472314075999748,
+      "relative_rmse": 0.0006092276307754219,
+      "max_abs": 0.008546300232410431,
+      "peak_rss_mib": 207.08203125,
+      "allocation_limit_mib": 480,
+      "full_frame_attention": true,
+      "exact_local_halos": true
+    },
+    {
+      "latent_size": 64,
+      "seconds": 17.729781357999855,
+      "relative_rmse": 0.0005833879695273936,
+      "max_abs": 0.008132081478834152,
+      "peak_rss_mib": 316.8984375,
+      "allocation_limit_mib": 480,
+      "full_frame_attention": true,
+      "exact_local_halos": true
+    }
+  ],
+  "bounded_cpu_runs": {
+    "native-gptq-256-final": {
+      "prompt": "A cargo ship burning at sea, smoke rising into the sky. oil painting",
+      "size": 256,
+      "steps": 12,
+      "guidance": 3.0,
+      "seed": 0,
+      "variant": "q4-gptq",
+      "text_bits": 8,
+      "stages": {
+        "encode": {
+          "prompt_tokens": 58,
+          "negative_tokens": 43,
+          "max_text_tokens": 256,
+          "text_bits": 8,
+          "seconds": 3.674138966999635,
+          "peak_rss_mib": 126.3828125,
+          "allocation_limit_mib": 480,
+          "forbidden_imports_loaded": []
+        },
+        "sample": {
+          "steps": 12,
+          "guidance": 3.0,
+          "size": 256,
+          "variant": "q4-gptq",
+          "seed": 0,
+          "noise_source": "NumPy PCG64",
+          "time_shift": 1.0,
+          "seconds": 123.45805478999955,
+          "peak_rss_mib": 179.91796875,
+          "allocation_limit_mib": 480,
+          "forbidden_imports_loaded": []
+        },
+        "decode": {
+          "image": "artifacts/edge-quality/native-gptq-256-final/image.png",
+          "decoder": "Original Qwen VAE, exact single-frame 2D specialization",
+          "decoder_tile_rows": 32,
+          "seconds": 5.038206674999856,
+          "peak_rss_mib": 135.87109375,
+          "allocation_limit_mib": 480,
+          "forbidden_imports_loaded": []
+        }
+      },
+      "total_seconds": 132.61292220700034
+    },
+    "native-gptq-384-final": {
+      "prompt": "A cargo ship burning at sea, smoke rising into the sky. oil painting",
+      "size": 384,
+      "steps": 12,
+      "guidance": 3.0,
+      "seed": 0,
+      "variant": "q4-gptq",
+      "text_bits": 8,
+      "stages": {
+        "encode": {
+          "prompt_tokens": 58,
+          "negative_tokens": 43,
+          "max_text_tokens": 256,
+          "text_bits": 8,
+          "seconds": 3.382661430000553,
+          "peak_rss_mib": 126.37890625,
+          "allocation_limit_mib": 480,
+          "forbidden_imports_loaded": []
+        },
+        "sample": {
+          "steps": 12,
+          "guidance": 3.0,
+          "size": 384,
+          "variant": "q4-gptq",
+          "seed": 0,
+          "noise_source": "NumPy PCG64",
+          "time_shift": 1.5,
+          "seconds": 195.91440770000008,
+          "peak_rss_mib": 237.6953125,
+          "allocation_limit_mib": 480,
+          "forbidden_imports_loaded": []
+        },
+        "decode": {
+          "image": "artifacts/edge-quality/native-gptq-384-final/image.png",
+          "decoder": "Original Qwen VAE, exact single-frame 2D specialization",
+          "decoder_tile_rows": 32,
+          "seconds": 9.490726547000122,
+          "peak_rss_mib": 217.60546875,
+          "allocation_limit_mib": 480,
+          "forbidden_imports_loaded": []
+        }
+      },
+      "total_seconds": 209.20259768599954
+    },
+    "candidate-native-384": {
+      "prompt": "A red tractor in a golden wheat field. oil painting",
+      "size": 384,
+      "steps": 8,
+      "guidance": 1.0,
+      "seed": 0,
+      "variant": "q4-distilled-3000-gptq",
+      "text_bits": 8,
+      "decoder": "tiny-qwen",
+      "stages": {
+        "encode": {
+          "prompt_tokens": 54,
+          "negative_tokens": 0,
+          "negative_encoded": false,
+          "max_text_tokens": 256,
+          "prompt_truncated": false,
+          "text_bits": 8,
+          "manifest_sha256": "d77bb85713db2348eff9e6f0e07c5450d2ddd302753602b7e05835a4359e0489",
+          "seconds": 2.2151977169996826,
+          "peak_rss_mib": 126.4375,
+          "allocation_limit_mib": 480,
+          "machine": "x86_64",
+          "threads": 4,
+          "backend": "ncnn",
+          "numpy_version": "2.2.6",
+          "ncnn_version": "1.0.20261020",
+          "forbidden_imports_loaded": []
+        },
+        "sample": {
+          "steps": 8,
+          "guidance": 1.0,
+          "size": 384,
+          "variant": "q4-distilled-3000-gptq",
+          "seed": 0,
+          "noise_source": "NumPy PCG64",
+          "time_shift": 1.5,
+          "manifest_sha256": "bed37ae8263289d5702dc7817ed5afa88f57ee05a5835b7069ce0f365726bbbd",
+          "seconds": 48.45100103600089,
+          "peak_rss_mib": 234.71875,
+          "allocation_limit_mib": 480,
+          "machine": "x86_64",
+          "threads": 4,
+          "backend": "ncnn",
+          "numpy_version": "2.2.6",
+          "ncnn_version": "1.0.20261020",
+          "forbidden_imports_loaded": []
+        },
+        "decode": {
+          "image": "artifacts/edge-quality/candidate-native-384/image.png",
+          "decoder": "Tiny Qwen, locally distilled lossy decoder",
+          "decoder_metadata_sha256": "83c2a4611c76972ca11cf95aba66f249a3c22c650a1274bc1f4c4bdb7f9f1224",
+          "seconds": 0.48583454199979315,
+          "peak_rss_mib": 248.28125,
+          "allocation_limit_mib": 480,
+          "machine": "x86_64",
+          "threads": 4,
+          "backend": "ncnn",
+          "numpy_version": "2.2.6",
+          "ncnn_version": "1.0.20261020",
+          "forbidden_imports_loaded": []
+        }
+      },
+      "total_seconds": 51.503813304001596
+    },
+    "candidate-native-512-bounded": {
+      "prompt": "A lighthouse on a rocky coast under storm clouds. oil painting",
+      "size": 512,
+      "steps": 8,
+      "guidance": 1.0,
+      "seed": 0,
+      "variant": "q4-distilled-3000-gptq",
+      "text_bits": 8,
+      "decoder": "tiny-qwen",
+      "stages": {
+        "encode": {
+          "prompt_tokens": 56,
+          "negative_tokens": 0,
+          "negative_encoded": false,
+          "max_text_tokens": 256,
+          "prompt_truncated": false,
+          "text_bits": 8,
+          "manifest_sha256": "d77bb85713db2348eff9e6f0e07c5450d2ddd302753602b7e05835a4359e0489",
+          "seconds": 1.8869497269988642,
+          "peak_rss_mib": 127.60546875,
+          "allocation_limit_mib": 480,
+          "machine": "x86_64",
+          "threads": 4,
+          "backend": "ncnn",
+          "numpy_version": "2.2.6",
+          "ncnn_version": "1.0.20261020",
+          "forbidden_imports_loaded": []
+        },
+        "sample": {
+          "steps": 8,
+          "guidance": 1.0,
+          "size": 512,
+          "variant": "q4-distilled-3000-gptq",
+          "seed": 0,
+          "noise_source": "NumPy PCG64",
+          "time_shift": 2.0,
+          "manifest_sha256": "bed37ae8263289d5702dc7817ed5afa88f57ee05a5835b7069ce0f365726bbbd",
+          "seconds": 74.67215939400012,
+          "peak_rss_mib": 277.2265625,
+          "allocation_limit_mib": 480,
+          "machine": "x86_64",
+          "threads": 4,
+          "backend": "ncnn",
+          "numpy_version": "2.2.6",
+          "ncnn_version": "1.0.20261020",
+          "forbidden_imports_loaded": []
+        },
+        "decode": {
+          "image": "artifacts/edge-quality/candidate-native-512-bounded/image.png",
+          "decoder": "Tiny Qwen, locally distilled lossy decoder",
+          "decoder_metadata_sha256": "4d2804376bd40d98b067d36f99a91b3784102084ce116596f9ad412272bed25e",
+          "seconds": 0.8895744410001498,
+          "peak_rss_mib": 396.953125,
+          "allocation_limit_mib": 480,
+          "machine": "x86_64",
+          "threads": 4,
+          "backend": "ncnn",
+          "numpy_version": "2.2.6",
+          "ncnn_version": "1.0.20261020",
+          "forbidden_imports_loaded": []
+        }
+      },
+      "total_seconds": 77.83946426599869
+    },
+    "candidate-bundle-cpu-check": {
+      "prompt": "A red tractor in a golden wheat field. oil painting",
+      "size": 384,
+      "steps": 8,
+      "guidance": 1.0,
+      "seed": 0,
+      "variant": "q4-distilled-3000-gptq",
+      "text_bits": 8,
+      "decoder": "tiny-qwen",
+      "stages": {
+        "encode": {
+          "prompt_tokens": 54,
+          "negative_tokens": 0,
+          "negative_encoded": false,
+          "max_text_tokens": 256,
+          "prompt_truncated": false,
+          "text_bits": 8,
+          "manifest_sha256": "d77bb85713db2348eff9e6f0e07c5450d2ddd302753602b7e05835a4359e0489",
+          "seconds": 1.9363021540011687,
+          "peak_rss_mib": 127.27734375,
+          "allocation_limit_mib": 480,
+          "machine": "x86_64",
+          "threads": 4,
+          "backend": "ncnn",
+          "numpy_version": "2.2.6",
+          "ncnn_version": "1.0.20261020",
+          "forbidden_imports_loaded": []
+        },
+        "sample": {
+          "steps": 8,
+          "guidance": 1.0,
+          "size": 384,
+          "variant": "q4-distilled-3000-gptq",
+          "seed": 0,
+          "noise_source": "NumPy PCG64",
+          "time_shift": 1.5,
+          "manifest_sha256": "bed37ae8263289d5702dc7817ed5afa88f57ee05a5835b7069ce0f365726bbbd",
+          "seconds": 43.09521687800043,
+          "peak_rss_mib": 212.26171875,
+          "allocation_limit_mib": 480,
+          "machine": "x86_64",
+          "threads": 4,
+          "backend": "ncnn",
+          "numpy_version": "2.2.6",
+          "ncnn_version": "1.0.20261020",
+          "forbidden_imports_loaded": []
+        },
+        "decode": {
+          "image": "/tmp/news-art-inko-final-bundle-check/image.png",
+          "decoder": "Tiny Qwen, locally distilled lossy decoder",
+          "decoder_metadata_sha256": "4d2804376bd40d98b067d36f99a91b3784102084ce116596f9ad412272bed25e",
+          "seconds": 0.47609117399952083,
+          "peak_rss_mib": 248.09375,
+          "allocation_limit_mib": 480,
+          "machine": "x86_64",
+          "threads": 4,
+          "backend": "ncnn",
+          "numpy_version": "2.2.6",
+          "ncnn_version": "1.0.20261020",
+          "forbidden_imports_loaded": []
+        }
+      },
+      "total_seconds": 45.923621733998516
+    }
+  },
+  "limitations": [
+    "RLIMIT_DATA is not an RSS or swap cap",
+    "Four-bit storage uses FP32 dequantized multiplication",
+    "No ARMv7 complete-image, performance, power or HDMI verification",
+    "Dense training resumed at step 1500 with a fresh optimizer after a corrected inference-cache failure",
+    "512px initial final-checkpoint run failed an allocation; retained separately for comparison"
+  ],
+  "packed_transformers": {
+    "q4-gptq": {
+      "source_revision": "2f690976f5ce9aadad7c76f786d3c503f86795e4",
+      "code_revision": "9f8f79cd7491bf96b13d43f290cc9a281afd5787",
+      "calibration_sha256": "34ecddebc147c38d50b7ee76da898ab703b1197960835d05d6c4d533920bd364",
+      "total_bytes": 379270916
+    },
+    "q4-distilled-3000-gptq": {
+      "source_revision": "2f690976f5ce9aadad7c76f786d3c503f86795e4",
+      "code_revision": "9f8f79cd7491bf96b13d43f290cc9a281afd5787",
+      "checkpoint_sha256": "4d4d8275e1e522597ea76f84c4c5e342780736c514bc9211a1d8c2003c1fa8c6",
+      "calibration_sha256": "8025ab0467b5201c54cdd1a51ca0138839cb1881e95afc985206b465d7f8a315",
+      "total_bytes": 379270916
+    }
+  },
+  "workspace_fix": "NCNN GEMM bounds output rows to 2048 per call for large transposed weights; fixes the observed later-pass 512px allocation failure without changing output math.",
+  "standalone_bundle_check": "Full default recipe executed from candidate-bundle directory with --models models, without repository PYTHONPATH or GPU; all three stages completed under 480 MiB allocation limit."
+}

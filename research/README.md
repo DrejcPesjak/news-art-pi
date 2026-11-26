@@ -383,3 +383,11 @@ systemd-run --user --wait --pipe --collect --unit=news-art-model-trial \
 Reports separate model loading, computation, and per-stage peak RSS. The process
 data limit is inherited by child processes; the heavyweight stages do not overlap.
 A failed experiment does not modify the production display's state or services.
+
+## Inko compression and distillation (26 November 2026)
+
+See [edge_quality/README.md](edge_quality/README.md) for the completed local
+weight-edit, quantization, portable runtime, trajectory distillation, tiny
+decoder and failed pruning experiments. The selected eight-step Inko candidate
+completes fresh CPU stages under a 480 MiB allocation limit on the laptop.
+This research does not yet establish ARMv7 performance or change production.

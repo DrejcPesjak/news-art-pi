@@ -1,0 +1,18 @@
+[
+  {"id":"ship","split":"development","prompt":"A cargo ship burning at sea, smoke rising into the sky. oil painting"},
+  {"id":"football","split":"development","prompt":"Women football players celebrating with a trophy on a football pitch. oil painting"},
+  {"id":"hospital","split":"development","prompt":"A doctor examining a patient in a hospital room. oil painting"},
+  {"id":"rocket","split":"development","prompt":"A rocket launching from a coastal spaceport, flames and clouds of smoke. oil painting"},
+  {"id":"flood","split":"development","prompt":"A rescue boat moving between flooded houses. oil painting"},
+  {"id":"solar","split":"development","prompt":"Solar panels on rolling green hills under a blue sky. oil painting"},
+  {"id":"jellyfish","split":"development","prompt":"A sea jellyfish floating in the pitch-black ocean depths. oil painting"},
+  {"id":"concert","split":"development","prompt":"A singer holding a microphone on a concert stage. oil painting"},
+  {"id":"bridge","split":"evaluation","prompt":"A damaged bridge over a river, workers inspecting its broken roadway. oil painting"},
+  {"id":"swimmer","split":"evaluation","prompt":"A swimmer beside a small sailboat on a sunlit sea. oil painting"},
+  {"id":"harvest","split":"evaluation","prompt":"A farmer harvesting golden wheat with a red tractor. oil painting"},
+  {"id":"penguins","split":"evaluation","prompt":"Penguins standing on a cracked iceberg in the Antarctic ocean. oil painting"},
+  {"id":"wedding","split":"evaluation","prompt":"A bride and groom standing together in a garden, white wedding dress and dark suit. oil painting"},
+  {"id":"basketball","split":"evaluation","prompt":"A basketball player in a red jersey jumping toward a hoop in a crowded arena. oil painting"},
+  {"id":"firefighters","split":"evaluation","prompt":"Firefighters spraying water on a burning forest, orange flames behind pine trees. oil painting"},
+  {"id":"spacecraft","split":"evaluation","prompt":"A robotic spacecraft with solar panels orbiting the planet Mercury. oil painting"}
+]
