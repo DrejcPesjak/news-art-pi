@@ -9,19 +9,18 @@ country = "US"
 max_age_hours = 48
 
 [generation]
-backend = "supra"
-image_size = 256
+backend = "inko"
+image_size = 384
 # Free-text style appended to the short, name-stripped scene caption.
 style = "oil painting"
-# Local Supra2 + distilled decoder; these defaults were measured on this Pi.
-steps = 25
-guidance = 3.0
+# Inko eight-pass distilled candidate with its trained tiny decoder.
+steps = 8
+guidance = 1.0
 seed = 0
 threads = 4
 memory_mib = 480
-timeout_seconds = 900
+timeout_seconds = 7200
 
 [display]
 refresh_seconds = 600
 title = "THE WORLD, REIMAGINED"
-

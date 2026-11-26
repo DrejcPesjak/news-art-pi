@@ -1,21 +1,23 @@
 # News Art Pi
 
-A self-contained Raspberry Pi news display. One Google News RSS feed, a new
-headline every ten minutes, and a fullscreen HDMI poster. No API keys, paid
-services, browser, or laptop needed at runtime.
+A self-contained Raspberry Pi news display. One Google News RSS feed, local
+AI illustrations, and a fullscreen HDMI poster. No API keys, paid services,
+browser, or laptop needed at runtime.
 
-The Pi generates 256 × 256 illustrations locally with Supra2, a Flan-T5 text
-encoder, and the compatible distilled TAESD decoder. Models load sequentially
-through NCNN to fit the Pi 2 B's RAM. A measured 25-step run took 9 min 30 s;
-[research results](research/RESULTS.md) include quality comparisons and limits.
-The last successful poster stays visible while the next image is generated.
+The selected backend is the eight-pass distilled Inko generator at 384 × 384,
+with Qwen text features and the locally trained tiny decoder. Fresh sequential
+NumPy/NCNN processes bound memory on the Pi 2 B. The configured ten-minute
+refresh interval is a minimum from job start; a longer generation finishes
+before the next begins. The last successful poster stays visible throughout.
+[Research results](research/RESULTS.md) separate laptop and Pi measurements.
+The previous Supra backend remains available through `config.supra.toml`.
 
 The later Inko compression research has three portable HTML reports:
 [experiments and results](research/reports/edge-quality/index.html),
 [direct weight editing](research/reports/edge-quality/weight-editing.html), and
 [from original Inko to the candidate](research/reports/edge-quality/inko-evolution.html).
 Open the downloaded HTML locally; GitHub's file view shows its source.
-This laptop research has not replaced the production Supra backend.
+The deployment evidence records the actual Pi revision, model and completed image.
 
 ## Change topics or art style
 
@@ -219,3 +221,28 @@ To apply a change immediately: `sudo systemctl start news-art-update.service`.
 
 Demo images are user-supplied reference assets; no license or ownership claim is
 made for their artwork. They are not photographs of the displayed news events.
+
+## Inko deployment candidate
+
+`config.inko.toml` selects the eight-step distilled Inko generator at 384px,
+CFG 1, with its locally trained tiny decoder. `config.supra.toml` retains the
+previous Supra settings. The application supports either backend; retain the
+last successful poster while a fresh sequential text/sample/decode job runs.
+
+The Inko bundle is installed separately from code under
+`/var/lib/news-art-pi/inko/releases/BUNDLE_SHA256`, with `inko/current` pointing
+to the verified version. `NEWS_ART_INKO_DIR` can override that bundle root.
+The worker uses only the bundle's `models/` subtree and the Git-deployed runtime
+code. Required native dependencies are NCNN, NumPy, Pillow and `regex`.
+There is no Torch/Transformers/Diffusers runtime dependency.
+
+The adapter supervises each stage in its own process group and shares a single
+7200-second generation budget across them. Each native stage gets a 480 MiB
+allocation limit; this is not an RSS or swap cap. Exact stage timings, peak RSS,
+model variant and guidance are saved under `state.json` → `inference`.
+The display explicitly labels Inko illustrations as AI-generated.
+
+The Pi generates at most one image at a time. The configured 600-second cadence
+is a minimum interval from job start, not a ten-minute Inko latency promise.
+Longer jobs finish before the next one starts. Runtime checks validate assets,
+native imports and the isolated caption converter, without generating an image.

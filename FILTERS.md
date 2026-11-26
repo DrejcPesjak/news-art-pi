@@ -163,23 +163,30 @@ found gives `a scene`. The original headline stays on screen. Shorter captions
 reduced fake lettering in local tests but can lose important meaning; poster or
 newspaper styles may encourage lettering again. Style fidelity is not guaranteed.
 
-`backend = "supra"` is the production default. It uses Supra2 with the compatible
-TAESD distilled decoder, entirely on the Pi. `backend = "demo"` switches back to
-rotating the three supplied pictures; style changes do not affect demo artwork.
-Supra requires `image_size = 256`; demo accepts 64–1024. Originals are preserved.
+`backend = "inko"` selects the eight-pass distilled Inko generator and its
+trained tiny decoder. The default is 384px and CFG 1. The previous Supra
+configuration is retained in `config.supra.toml`; `backend = "demo"` rotates
+the three supplied pictures. Original demo images remain intact.
 
-| Generation setting | Default | Effect |
+Inko accepts 256, 384 or 512px (the selected Pi recipe is 384px). Supra requires
+256px. Demo accepts 64–1024px. Model sizes other than the measured recipe can
+change quality, latency and memory use.
+
+| Generation setting | Inko default | Effect |
 | --- | --- | --- |
-| `steps` | `25` | Sampling steps (1–100). Fewer is faster with less detail. |
-| `guidance` | `3.0` | Prompt guidance (1–10); the measured preset uses 3. |
+| `steps` | `8` | The selected student was trained for eight sampling steps. |
+| `guidance` | `1.0` | Values above 1 add a second sequential model evaluation per step. |
 | `seed` | `0` | Base seed; poster sequence is added for variety. |
-| `threads` | `4` | CPU threads; four was measured on this Pi. |
-| `memory_mib` | `480` | Per-stage Linux allocation limit. |
-| `timeout_seconds` | `900` | Stop the entire pipeline if a job takes too long. |
+| `threads` | `4` | NCNN CPU threads. |
+| `memory_mib` | `480` | Per-stage Linux allocation limit, not an exact RSS cap or swap policy. |
+| `timeout_seconds` | `7200` | One total generation budget shared across the native stages. |
 
-A measured 25-step run took about 9½ minutes. Refreshes are scheduled from job
-start; if a job exceeds the interval, the next job starts after it finishes.
-No overlapping generation jobs are started. The previous poster stays visible
-on a failure or while a new illustration is prepared.
+The original Supra preset is 25 steps / CFG 3 / 900-second timeout. Guidance
+and sampling steps are distinct controls. CFG 2 had mixed visual preferences;
+CFG 1.5 is untested, and the selected default stays at CFG 1.
+
+Refreshes are scheduled from job start. If a job exceeds the configured
+interval, the next starts after completion; generations never overlap.
+The previous poster stays visible during a run or after a failure.
 
 `display.title` is free text for the small heading above the poster.
