@@ -1,0 +1,26 @@
+# Edit this file and push to deploy. The Pi applies it automatically.
+# See FILTERS.md for search examples, art styles, and deployment instructions.
+[news]
+# One provider: Google News RSS. Empty query = general English US-edition news.
+# Examples: "sports", "Spain", "sports Spain", "science OR technology".
+query = ""
+language = "en-US"
+country = "US"
+max_age_hours = 48
+
+[generation]
+backend = "inko"
+image_size = 384
+# Free-text style appended to the short, name-stripped scene caption.
+style = "oil painting"
+# Inko eight-pass distilled candidate with its trained tiny decoder.
+steps = 8
+guidance = 1.0
+seed = 0
+threads = 4
+memory_mib = 480
+timeout_seconds = 7200
+
+[display]
+refresh_seconds = 600
+title = "THE WORLD, REIMAGINED"

@@ -18,6 +18,7 @@ STORY = {"id": "story1", "headline": "A test headline", "source": "Example News"
 def demo_config():
     config = load()
     config["generation"]["backend"] = "demo"
+    config["generation"]["image_size"] = 256
     return config
 
 

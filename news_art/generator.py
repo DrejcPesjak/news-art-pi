@@ -17,7 +17,7 @@ def prompt_for(story, style, fetch_context=False):
 
 def generate(story, config, index, state_dir=None):
     """Return an RGB square and its prompt, using the selected local backend."""
-    if config.get("backend", "demo") == "supra":
+    if config.get("backend", "demo") in ("supra", "inko"):
         prompt = prompt_for(story, config["style"], fetch_context=True)
     else:
         prompt = f'{story["headline"]}. {config["style"].strip()}'
@@ -26,6 +26,11 @@ def generate(story, config, index, state_dir=None):
         if state_dir is None:
             raise ValueError("Supra generation requires a writable state directory")
         return generate_supra(prompt, config, index, state_dir), prompt
+    if config.get("backend") == "inko":
+        from .inko import generate as generate_inko
+        if state_dir is None:
+            raise ValueError("Inko generation requires a writable state directory")
+        return generate_inko(prompt, config, index, state_dir), prompt
     paths = sorted(p for p in (ROOT / "imgs").iterdir() if p.suffix.lower() in (".png", ".jpg", ".jpeg"))
     if not paths:
         raise ValueError("No demo images found in imgs/")

@@ -63,8 +63,10 @@ def cycle(config, directory, stories=None):
              "title": config["display"]["title"], "backend": config["generation"]["backend"],
              "generation_seconds": time.monotonic()-started,
              "seed": (config["generation"].get("seed", 0)+sequence) % 2**32,
-             "steps": config["generation"].get("steps") if config["generation"]["backend"] == "supra" else None,
+             "steps": config["generation"].get("steps") if config["generation"]["backend"] in ("supra", "inko") else None,
              "history": (history + [story["id"]])[-500:]}
+    if "inference" in picture.info:
+        state["inference"] = picture.info["inference"]
     write_json(directory / "state.json", state)
     write_json(directory / "job.json", {"status": "idle", "finished_at": state["generated_at"],
                "sequence": state["sequence"], "generation_seconds": state["generation_seconds"]})
@@ -76,7 +78,7 @@ def self_check(config):
     # Offline release validation: exercises assets and configuration without network.
     sample = {"id": "check", "headline": "Display ready", "source": "Demo",
               "url": "https://example.com", "published": datetime.now(timezone.utc).isoformat()}
-    if config["generation"]["backend"] == "supra":
+    if config["generation"]["backend"] in ("supra", "inko"):
         return  # Target runtime is checked separately; never infer during validation.
     for index in range(3):
         image, _ = generate(sample, config["generation"], index)
@@ -99,10 +101,13 @@ def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     config = load(args.config)
     self_check(config)
-    if config["generation"]["backend"] == "supra" and (args.check_runtime or not args.check):
+    if config["generation"]["backend"] in ("supra", "inko") and (args.check_runtime or not args.check):
         from .captions import check_runtime as check_captions
         check_captions()
-        from .supra import check_runtime
+        if config["generation"]["backend"] == "inko":
+            from .inko import check_runtime
+        else:
+            from .supra import check_runtime
         check_runtime()
     if args.check or args.check_runtime:
         log.info("Configuration and selected assets are valid")

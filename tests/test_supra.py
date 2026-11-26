@@ -22,7 +22,7 @@ STORY = {"id": "news-test", "headline": "A rocket launches from Spain",
 
 class SupraIntegrationTests(unittest.TestCase):
     def test_supra_config_rejects_unsupported_resolution_and_bad_parameters(self):
-        original = Path("config.toml").read_text()
+        original = Path("config.supra.toml").read_text()
         for old, new in [("image_size = 256", "image_size = 512"),
                          ("steps = 25", "steps = 0"),
                          ("guidance = 3.0", "guidance = nan")]:
@@ -32,7 +32,7 @@ class SupraIntegrationTests(unittest.TestCase):
                 with self.assertRaises(ValueError): load(path)
 
     def test_adapter_passes_prompt_as_one_argument_and_validates_image(self):
-        config = load()["generation"]
+        config = load(Path("config.supra.toml"))["generation"]
         story = dict(STORY, headline="An unusual event; $(touch should-never-execute)")
         observed = []
         def pipeline(command, timeout, environment):
@@ -50,7 +50,7 @@ class SupraIntegrationTests(unittest.TestCase):
             self.assertEqual(list((Path(temporary)/"generation").iterdir()), [])
 
     def test_model_failure_keeps_previous_state_and_records_error(self):
-        config = load()
+        config = load(Path("config.supra.toml"))
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)
             with patch("news_art.worker.generate", return_value=(Image.new("RGB",(256,256)), "prompt")):
