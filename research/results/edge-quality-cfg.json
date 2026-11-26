@@ -169,5 +169,12 @@
     },
     "total_seconds": 94.51731133300018
   },
-  "timing_limitations": "Separate laptop runs, some concurrent GPU experimentation and thermal variation; descriptive measurements, not a controlled performance benchmark or Pi prediction."
+  "timing_limitations": "Separate laptop runs, some concurrent GPU experimentation and thermal variation; descriptive measurements, not a controlled performance benchmark or Pi prediction.",
+  "user_feedback": {
+    "cfg2_preferred_approx_percent": 60,
+    "cfg1_preferred_approx_percent": 40,
+    "assessment": "Informal visual preference reported by Drew; no formal per-image scores or denominator supplied",
+    "cfg1_5": "Suggested compromise, not tested",
+    "settings_changed": false
+  }
 }

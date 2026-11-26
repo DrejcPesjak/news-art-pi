@@ -1,0 +1,22 @@
+{
+  "date": "2026-11-26",
+  "scope": "Only this experiment; original models, production/deployment evidence and older research untouched",
+  "protected": [
+    "distill/merged-3000",
+    "all dense adapter checkpoints",
+    "distill/trainer-state-3000.pt",
+    "small/merged-6000",
+    "small/trainer-state-6000.pt",
+    "all training prompts/conditioning/trajectories",
+    "all comparison images and metrics",
+    "current candidate-bundle and quality-bundle plus archives",
+    "all original downloads under models/"
+  ],
+  "removed_bytes": 33227457655,
+  "completed": true,
+  "archived_logs": 117,
+  "log_archive": "artifacts/edge-quality/logs/laptop-runs-2026-11-26.tar.gz",
+  "log_archive_sha256": "f5659f4a048adc8417480778bd02743cdfb3e01db2542beaa0b4d97c6dd5087c",
+  "free_space_increase_bytes": 33239797760,
+  "removed_entry_count": 375
+}
