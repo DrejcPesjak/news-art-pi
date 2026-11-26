@@ -40,6 +40,10 @@ def main():
     rows.append("<p>The selected fast candidate uses the dense 3000-update checkpoint, eight conditional passes, mixed 4/8-bit weights and a separately trained 6000-update tiny decoder. The 244M pruned model failed recovery and is rejected. Guided quantized Inko retains more texture and remains the quality fallback.</p>")
     for seed in (0,1):
         rows.append(f"<p><a href='{link(OUTPUT/f'final-evaluation-seed-{seed}.jpg')}'>Four-way Inko comparison, seed {seed}, including exact and tiny student decoders</a></p>")
+    if (OUTPUT/"cfg-sweep-summary.json").exists():
+        rows.append("<h2>Additional CFG sweep</h2><p>The same eight-step student and tiny decoder at CFG 1, 2, 3 and 4.5. CFG 2 restores contrast/color in many samples; higher settings do not reliably repair coherence. These are evaluation-caption diagnostics, not a new independent test set.</p>")
+        for seed in (0,1):
+            rows.append(f"<p><a href='{link(OUTPUT/f'cfg-sweep-seed-{seed}.jpg')}'>CFG comparison, seed {seed}</a></p>")
     for seed in (0,1):
         rows.append(f"<h2>Evaluation scenes — seed {seed}</h2><div class='scroll'><table><tr><th>Prompt</th>"+"".join(f"<th>{e(v)}</th>" for v in variants)+"</tr>")
         for scene in prompts("evaluation"):

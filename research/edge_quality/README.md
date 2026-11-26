@@ -238,3 +238,30 @@ attempt failed during pass four with NCNN allocation error -100. Bounding
 transposed-weight GEMM packing to 2048 output rows per call fixed that observed
 workspace failure; numerical parity remained unchanged. The failed logs are
 retained. The default remains 384px for more memory headroom.
+
+## Additional CFG sweep
+
+At the user's request, the same eight-step 3000-update student and 6000-update
+tiny decoder were compared at CFG 1, 2, 3 and 4.5 on all eight evaluation captions
+and both seeds. These captions have already been inspected, so this is tuning
+on an existing comparison set, not a fresh held-out quality result.
+
+CFG is separate from the sampling-step count. The sequential runtime performs
+8 transformer calls at eight steps/CFG 1, and 16 calls at any tested CFG above 1.
+Increasing CFG from 2 to 4.5 changes a scalar, not the number of evaluations.
+Weights stay shared and the two forwards are sequential, so RAM does not double.
+The student was trained on mean velocities from a CFG-4.5 teacher, with a single
+conditional call at inference; its empty-prompt output was not explicitly trained
+by this distillation objective. Extra CFG is therefore an empirical extrapolation.
+
+Manual inspection finds stronger color and contrast at CFG 2; 3–4.5 pushes these
+further, sometimes with harsh edges/highlights. Duplicated people, anatomy,
+pseudo-text and spacecraft/robot confusion persist. The existing default bundle
+was kept unchanged. Results are in `research/results/edge-quality-cfg.json` and
+local `cfg-sweep-seed-{0,1}.jpg` sheets, linked from the main visual report.
+
+The complete CFG-2 CPU trial took 94.52 s versus 45.92 s for the
+earlier CFG-1 standalone trial. Sampling peak RSS was 207.3 MiB versus 212.3 MiB;
+decoder peak was about 248 MiB in both. All stages completed under the same
+480 MiB allocation limit without heavy frameworks. Separate laptop runs have
+thermal/contention variation; these are descriptive, not Pi timings.
