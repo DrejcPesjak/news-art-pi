@@ -391,3 +391,11 @@ weight-edit, quantization, portable runtime, trajectory distillation, tiny
 decoder and failed pruning experiments. The selected eight-step Inko candidate
 completes fresh CPU stages under a 480 MiB allocation limit on the laptop.
 This research does not yet establish ARMv7 performance or change production.
+
+
+The [portable experiment report](reports/edge-quality/index.html),
+[weight-editing report](reports/edge-quality/weight-editing.html), and
+[Inko evolution report](reports/edge-quality/inko-evolution.html) include compact
+image previews and plots. Open the HTML files locally with their assets folder.
+Large checkpoints, original images and archived logs remain in ignored local
+artifacts. Regeneration and cleanup details are in the experiment README.

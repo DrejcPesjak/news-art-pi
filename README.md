@@ -10,6 +10,13 @@ through NCNN to fit the Pi 2 B's RAM. A measured 25-step run took 9 min 30 s;
 [research results](research/RESULTS.md) include quality comparisons and limits.
 The last successful poster stays visible while the next image is generated.
 
+The later Inko compression research has three portable HTML reports:
+[experiments and results](research/reports/edge-quality/index.html),
+[direct weight editing](research/reports/edge-quality/weight-editing.html), and
+[from original Inko to the candidate](research/reports/edge-quality/inko-evolution.html).
+Open the downloaded HTML locally; GitHub's file view shows its source.
+This laptop research has not replaced the production Supra backend.
+
 ## Change topics or art style
 
 See [FILTERS.md](FILTERS.md) for topic examples, query syntax, language/edition

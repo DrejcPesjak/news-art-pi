@@ -1,0 +1,180 @@
+{
+  "date": "2026-11-26",
+  "checkpoint": "q4-distilled-3000-gptq",
+  "size": 384,
+  "steps": 8,
+  "decoder": "tiny-qwen-6000",
+  "captions": 8,
+  "seeds": [
+    0,
+    1
+  ],
+  "purpose": "Test user hypothesis that higher CFG restores color and detail",
+  "teacher_distillation_cfg": 4.5,
+  "student_training_cfg_at_inference": 1,
+  "unconditional_student_explicitly_trained": false,
+  "observations": "CFG 2 restores contrast/color in many samples; 3 to 4.5 becomes more contrasty and saturated. Subject confusion, duplicated people, anatomy and text artifacts persist. Small subjective engineering sample, not a quality benchmark.",
+  "default_bundle_changed": false,
+  "variants": {
+    "1": {
+      "images": 16,
+      "transformer_calls_per_image": 8,
+      "median_gpu_seconds": 0.4007746485003736,
+      "gpu_max_allocated_mib": 1172.58251953125
+    },
+    "2": {
+      "images": 16,
+      "transformer_calls_per_image": 16,
+      "median_gpu_seconds": 0.7310082795002018,
+      "gpu_max_allocated_mib": 1172.58251953125
+    },
+    "3": {
+      "images": 16,
+      "transformer_calls_per_image": 16,
+      "median_gpu_seconds": 0.7421365444997718,
+      "gpu_max_allocated_mib": 1164.95751953125
+    },
+    "4.5": {
+      "images": 16,
+      "transformer_calls_per_image": 16,
+      "median_gpu_seconds": 0.7538319489995047,
+      "gpu_max_allocated_mib": 1164.36376953125
+    }
+  },
+  "cpu_cfg1": {
+    "prompt": "A red tractor in a golden wheat field. oil painting",
+    "size": 384,
+    "steps": 8,
+    "guidance": 1.0,
+    "seed": 0,
+    "variant": "q4-distilled-3000-gptq",
+    "text_bits": 8,
+    "decoder": "tiny-qwen",
+    "stages": {
+      "encode": {
+        "prompt_tokens": 54,
+        "negative_tokens": 0,
+        "negative_encoded": false,
+        "max_text_tokens": 256,
+        "prompt_truncated": false,
+        "text_bits": 8,
+        "manifest_sha256": "d77bb85713db2348eff9e6f0e07c5450d2ddd302753602b7e05835a4359e0489",
+        "seconds": 1.9363021540011687,
+        "peak_rss_mib": 127.27734375,
+        "allocation_limit_mib": 480,
+        "machine": "x86_64",
+        "threads": 4,
+        "backend": "ncnn",
+        "numpy_version": "2.2.6",
+        "ncnn_version": "1.0.20261020",
+        "forbidden_imports_loaded": []
+      },
+      "sample": {
+        "steps": 8,
+        "guidance": 1.0,
+        "size": 384,
+        "variant": "q4-distilled-3000-gptq",
+        "seed": 0,
+        "noise_source": "NumPy PCG64",
+        "time_shift": 1.5,
+        "manifest_sha256": "bed37ae8263289d5702dc7817ed5afa88f57ee05a5835b7069ce0f365726bbbd",
+        "seconds": 43.09521687800043,
+        "peak_rss_mib": 212.26171875,
+        "allocation_limit_mib": 480,
+        "machine": "x86_64",
+        "threads": 4,
+        "backend": "ncnn",
+        "numpy_version": "2.2.6",
+        "ncnn_version": "1.0.20261020",
+        "forbidden_imports_loaded": []
+      },
+      "decode": {
+        "image": "/tmp/news-art-inko-final-bundle-check/image.png",
+        "decoder": "Tiny Qwen, locally distilled lossy decoder",
+        "decoder_metadata_sha256": "4d2804376bd40d98b067d36f99a91b3784102084ce116596f9ad412272bed25e",
+        "seconds": 0.47609117399952083,
+        "peak_rss_mib": 248.09375,
+        "allocation_limit_mib": 480,
+        "machine": "x86_64",
+        "threads": 4,
+        "backend": "ncnn",
+        "numpy_version": "2.2.6",
+        "ncnn_version": "1.0.20261020",
+        "forbidden_imports_loaded": []
+      }
+    },
+    "total_seconds": 45.923621733998516
+  },
+  "cpu_cfg2": {
+    "prompt": "A red tractor in a golden wheat field. oil painting",
+    "size": 384,
+    "steps": 8,
+    "guidance": 2.0,
+    "seed": 0,
+    "variant": "q4-distilled-3000-gptq",
+    "text_bits": 8,
+    "decoder": "tiny-qwen",
+    "stages": {
+      "encode": {
+        "prompt_tokens": 54,
+        "negative_tokens": 43,
+        "negative_encoded": true,
+        "max_text_tokens": 256,
+        "prompt_truncated": false,
+        "text_bits": 8,
+        "manifest_sha256": "d77bb85713db2348eff9e6f0e07c5450d2ddd302753602b7e05835a4359e0489",
+        "seconds": 3.366592047999802,
+        "peak_rss_mib": 126.66015625,
+        "allocation_limit_mib": 480,
+        "machine": "x86_64",
+        "threads": 4,
+        "backend": "ncnn",
+        "numpy_version": "2.2.6",
+        "ncnn_version": "1.0.20261020",
+        "forbidden_imports_loaded": []
+      },
+      "sample": {
+        "steps": 8,
+        "guidance": 2.0,
+        "size": 384,
+        "variant": "q4-distilled-3000-gptq",
+        "seed": 0,
+        "noise_source": "NumPy PCG64",
+        "time_shift": 1.5,
+        "manifest_sha256": "bed37ae8263289d5702dc7817ed5afa88f57ee05a5835b7069ce0f365726bbbd",
+        "seconds": 90.27736178899977,
+        "peak_rss_mib": 207.2578125,
+        "allocation_limit_mib": 480,
+        "machine": "x86_64",
+        "threads": 4,
+        "backend": "ncnn",
+        "numpy_version": "2.2.6",
+        "ncnn_version": "1.0.20261020",
+        "forbidden_imports_loaded": []
+      },
+      "decode": {
+        "image": "artifacts/edge-quality/cfg2-native-384/image.png",
+        "decoder": "Tiny Qwen, locally distilled lossy decoder",
+        "decoder_metadata_sha256": "4d2804376bd40d98b067d36f99a91b3784102084ce116596f9ad412272bed25e",
+        "seconds": 0.5489123919996928,
+        "peak_rss_mib": 248.29296875,
+        "allocation_limit_mib": 480,
+        "machine": "x86_64",
+        "threads": 4,
+        "backend": "ncnn",
+        "numpy_version": "2.2.6",
+        "ncnn_version": "1.0.20261020",
+        "forbidden_imports_loaded": []
+      }
+    },
+    "total_seconds": 94.51731133300018
+  },
+  "timing_limitations": "Separate laptop runs, some concurrent GPU experimentation and thermal variation; descriptive measurements, not a controlled performance benchmark or Pi prediction.",
+  "user_feedback": {
+    "cfg2_preferred_approx_percent": 60,
+    "cfg1_preferred_approx_percent": 40,
+    "assessment": "Informal visual preference reported by Drew; no formal per-image scores or denominator supplied",
+    "cfg1_5": "Suggested compromise, not tested",
+    "settings_changed": false
+  }
+}

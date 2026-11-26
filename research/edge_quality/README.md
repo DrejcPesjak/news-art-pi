@@ -265,3 +265,37 @@ earlier CFG-1 standalone trial. Sampling peak RSS was 207.3 MiB versus 212.3 MiB
 decoder peak was about 248 MiB in both. All stages completed under the same
 480 MiB allocation limit without heavy frameworks. Separate laptop runs have
 thermal/contention variation; these are descriptive, not Pi timings.
+
+
+## Portable HTML reports and artifact cleanup
+
+The committed reports under `research/reports/edge-quality/` cover the full
+experiment, the targeted Supra weight edit, and the Inko transformation. They
+include small WebP previews, static SVG plots, source-image hashes and compact
+metrics, without model weights or a redistributed caption corpus. Open
+`index.html` locally; its sibling pages and assets work offline.
+
+Regenerate from the retained local experiment evidence with:
+
+```bash
+~/venvs/ml/bin/python -m research.edge_quality.report
+```
+
+The generator needs the existing Pillow/Matplotlib packages and enforces a
+200 kB limit per content file and a 3 MB total content budget. Image previews
+are compressed; original PNGs remain local. Matplotlib is a report-generation
+dependency, not a Pi runtime dependency.
+
+Cleanup on 26 November recovered 30.96 GiB. It removed provisional bundles,
+intermediate merged checkpoints/optimizer states and regenerable exporter
+scratch. All dense adapters, final dense and rejected-model checkpoints,
+latest resume states, training data, original model downloads, active NCNN
+parts and image/metric evidence remain. The 117 loose laptop logs are now
+`artifacts/edge-quality/logs/laptop-runs-2026-11-26.tar.gz`, with original names,
+per-file hashes in `logs/index.json`, and a full cleanup inventory beside it.
+Current bundles were checksum-verified after cleanup. Re-export a full decoder
+graph before using an older command that requires deleted full-graph scratch.
+
+Drew subsequently reported an informal roughly 60/40 preference for CFG 2 over
+CFG 1. This is not a formal scored benchmark. CFG 1.5 is suggested but untested;
+no model or sampling settings changed during cleanup/reporting.
